@@ -2,20 +2,26 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, UtensilsCrossed, Settings, LogOut } from 'lucide-react'
+import { LayoutDashboard, UtensilsCrossed, Settings, LogOut, Shield } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
-const NAV_ITEMS = [
-  { href: '/dashboard',        label: 'Overview',     icon: LayoutDashboard },
-  { href: '/dashboard/menus',  label: 'Menus',        icon: UtensilsCrossed },
-  { href: '/dashboard/settings', label: 'Settings',   icon: Settings },
+const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS ?? 'eric@boommedia.us').split(',')
+
+const BASE_NAV = [
+  { href: '/dashboard',          label: 'Overview', icon: LayoutDashboard },
+  { href: '/dashboard/menus',    label: 'Menus',    icon: UtensilsCrossed },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 
 export default function Nav({ user }: { user: User }) {
-  const path   = usePathname()
-  const router = useRouter()
+  const path    = usePathname()
+  const router  = useRouter()
+  const isAdmin = ADMIN_EMAILS.includes(user.email ?? '')
+  const NAV_ITEMS = isAdmin
+    ? [...BASE_NAV, { href: '/admin', label: 'Admin', icon: Shield }]
+    : BASE_NAV
 
   async function handleSignOut() {
     const supabase = createClient()
