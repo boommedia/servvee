@@ -31,6 +31,12 @@ export default function SignupPage() {
       setError(error.message)
       setLoading(false)
     } else {
+      // Fire welcome email (best-effort — don't block on failure)
+      fetch('/api/email/welcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, firstName: email.split('@')[0] }),
+      }).catch(() => {})
       setDone(true)
     }
   }
