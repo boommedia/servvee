@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { ExternalLink, Eye, Canva as CanvaIcon } from 'lucide-react'
+import { ExternalLink, Eye } from 'lucide-react'
 import { parseDesignInput, embedUrl, editUrl } from '@/lib/types'
 import type { Promo, PromoFormData, DesignSource } from '@/lib/types'
 import CopyButton from './CopyButton'
