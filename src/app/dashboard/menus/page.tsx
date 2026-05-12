@@ -7,11 +7,12 @@ export default async function MenusPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: promos = [] } = await supabase
+  const { data } = await supabase
     .from('promos')
     .select('*')
     .eq('user_id', user!.id)
     .order('created_at', { ascending: false })
+  const promos = data ?? []
 
   return (
     <div>

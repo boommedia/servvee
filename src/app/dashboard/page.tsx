@@ -9,11 +9,12 @@ export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: promos = [] } = await supabase
+  const { data } = await supabase
     .from('promos')
     .select('*')
     .eq('user_id', user!.id)
     .order('created_at', { ascending: false })
+  const promos = data ?? []
 
   const roi = calcROI(promos as Promo[])
   const live = (promos as Promo[]).filter(p => promoStatus(p) === 'live')
