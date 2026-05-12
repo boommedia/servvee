@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Servvee — Expense Tracker</title>
+<style>
+  :root {
+    --red: #FF4444; --red-hover: #FF6B6B; --red-dim: #CC3333;
+    --bg: #090606; --surface: #150D0D; --surface2: #1A1010;
+    --border: #2A1515; --border2: #3A1F1F;
+    --text: #F0E0E0; --muted: #7A5555; --muted2: #9A6666;
+    --success: #4ADE80; --warn: #FBBF24; --info: #60A5FA;
+    --starter: #A78BFA;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; font-size: 13px; min-height: 100vh; }
+
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo span { color: var(--red); }
+  .header-meta { color: var(--muted); font-size: 11px; }
+
+  .wrapper { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+  .page-title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .page-sub { color: var(--muted2); font-size: 12px; margin-bottom: 28px; }
+  .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 12px; }
+
+  /* Summary bar */
+  .summary-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 28px; }
+  .summary-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .summary-stat .val { font-size: 22px; font-weight: 800; line-height: 1; }
+  .summary-stat .lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-top: 5px; }
+  .summary-stat.accent { border-color: rgba(255,68,68,0.35); background: rgba(255,68,68,0.05); }
+
+  /* Two-col layout */
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  .layout-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .card-title { font-size: 13px; font-weight: 700; margin-bottom: 14px; }
+
+  /* Expense rows */
+  .expense-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(42,21,21,0.5); }
+  .expense-row:last-child { border-bottom: none; }
+  .expense-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .expense-name { flex: 1; font-size: 12px; }
+  .expense-name .sub { font-size: 10px; color: var(--muted2); margin-top: 1px; }
+  .expense-type { padding: 1px 7px; border-radius: 3px; font-size: 9px; font-weight: 700; text-transform: uppercase; flex-shrink: 0; }
+  .expense-type.fixed { background: rgba(96,165,250,0.12); color: var(--info); border: 1px solid rgba(96,165,250,0.2); }
+  .expense-type.variable { background: rgba(251,191,36,0.12); color: var(--warn); border: 1px solid rgba(251,191,36,0.2); }
+  .expense-type.free { background: rgba(74,222,128,0.12); color: var(--success); border: 1px solid rgba(74,222,128,0.2); }
+  .expense-type.one-time { background: rgba(167,139,250,0.12); color: var(--starter); border: 1px solid rgba(167,139,250,0.2); }
+  .expense-amount { font-size: 13px; font-weight: 700; min-width: 64px; text-align: right; }
+  .expense-bar-wrap { width: 80px; }
+  .expense-bar { height: 4px; border-radius: 2px; background: var(--border2); overflow: hidden; }
+  .expense-bar-fill { height: 100%; border-radius: 2px; }
+
+  /* Category totals */
+  .cat-total { display: flex; justify-content: space-between; padding: 10px 0; border-top: 2px solid var(--border2); margin-top: 4px; font-weight: 700; font-size: 13px; }
+
+  /* Budget pie visual (CSS-only) */
+  .budget-breakdown { display: flex; flex-direction: column; gap: 8px; }
+  .budget-item { display: flex; align-items: center; gap: 10px; }
+  .budget-label { font-size: 11px; color: var(--muted2); width: 140px; flex-shrink: 0; }
+  .budget-track { flex: 1; height: 22px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+  .budget-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.9); }
+  .budget-pct { font-size: 11px; font-weight: 700; min-width: 40px; text-align: right; }
+
+  /* Monthly burn comparison */
+  .burn-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 28px; }
+  .burn-table { width: 100%; border-collapse: collapse; }
+  .burn-table th { padding: 10px 14px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); text-align: right; background: var(--surface2); }
+  .burn-table th:first-child { text-align: left; }
+  .burn-table td { padding: 9px 14px; border-top: 1px solid var(--border); font-size: 12px; text-align: right; }
+  .burn-table td:first-child { text-align: left; font-weight: 600; }
+  .burn-table tr:last-child td { border-top: 2px solid var(--border2); font-weight: 800; font-size: 13px; background: rgba(255,68,68,0.05); }
+  .num-red { color: var(--red); font-weight: 700; }
+  .num-green { color: var(--success); font-weight: 700; }
+  .num-yellow { color: var(--warn); font-weight: 700; }
+  .num-muted { color: var(--muted2); }
+
+  /* One-time costs */
+  .one-time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 28px; }
+  .one-time-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; border-left: 3px solid var(--starter); }
+  .one-time-name { font-size: 12px; font-weight: 700; }
+  .one-time-desc { font-size: 10px; color: var(--muted2); margin-top: 3px; }
+  .one-time-cost { font-size: 16px; font-weight: 800; color: var(--starter); margin-top: 6px; }
+
+  /* Runway calculator */
+  .runway-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 28px; }
+  .runway-title { font-size: 13px; font-weight: 700; margin-bottom: 14px; }
+  .runway-rows { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .runway-scenario { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .runway-scenario-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 8px; }
+  .runway-months { font-size: 28px; font-weight: 900; line-height: 1; }
+  .runway-detail { font-size: 10px; color: var(--muted2); margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Serv<span>vee</span></div>
+  <div class="header-meta">Expense Tracker &nbsp;·&nbsp; Fixed · Variable · One-Time Costs &nbsp;·&nbsp; May 2026</div>
+</div>
+
+<div class="wrapper">
+  <div class="page-title">Expense Breakdown</div>
+  <div class="page-sub">All monthly and one-time costs categorized by type. Based on solo-founder operation with no employees in Year 1.</div>
+
+  <!-- Summary bar -->
+  <div class="summary-bar">
+    <div class="summary-stat accent">
+      <div class="val" style="color:var(--red)">$1,847</div>
+      <div class="lbl">Total Monthly Burn</div>
+    </div>
+    <div class="summary-stat">
+      <div class="val" style="color:var(--info)">$317</div>
+      <div class="lbl">Fixed Monthly</div>
+    </div>
+    <div class="summary-stat">
+      <div class="val" style="color:var(--warn)">$380</div>
+      <div class="lbl">Variable Monthly</div>
+    </div>
+    <div class="summary-stat">
+      <div class="val" style="color:var(--starter)">$1,150</div>
+      <div class="lbl">Founder Draw (optional)</div>
+    </div>
+    <div class="summary-stat">
+      <div class="val" style="color:var(--success)">$2,553</div>
+      <div class="lbl">MRR to Break Even</div>
+    </div>
+  </div>
+
+  <!-- Fixed + Variable expenses side by side -->
+  <div class="layout">
+    <!-- Fixed costs -->
+    <div class="card">
+      <div class="card-title">Fixed Monthly Expenses</div>
+
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--info)"></div>
+        <div class="expense-name">Supabase Pro<div class="sub">PostgreSQL + Auth + Storage</div></div>
+        <span class="expense-type fixed">Fixed</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:79%;background:var(--info)"></div></div></div>
+        <div class="expense-amount" style="color:var(--info)">$25.00</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--info)"></div>
+        <div class="expense-name">Vercel Pro<div class="sub">Hosting + Edge + Analytics</div></div>
+        <span class="expense-type fixed">Fixed</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:63%;background:var(--info)"></div></div></div>
+        <div class="expense-amount" style="color:var(--info)">$20.00</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--info)"></div>
+        <div class="expense-name">Resend Email<div class="sub">Transactional + marketing</div></div>
+        <span class="expense-type fixed">Fixed</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:63%;background:var(--info)"></div></div></div>
+        <div class="expense-amount" style="color:var(--info)">$20.00</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--info)"></div>
+        <div class="expense-name">Lemon Squeezy / Paddle alt<div class="sub">Merchant of record (if switching from Stripe)</div></div>
+        <span class="expense-type fixed">Fixed</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:29%;background:var(--info)"></div></div></div>
+        <div class="expense-amount" style="color:var(--muted2)">$0.00</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--info)"></div>
+        <div class="expense-name">Domain (amortized)<div class="sub">servvee.online at Namecheap</div></div>
+        <span class="expense-type fixed">Fixed</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:4%;background:var(--info)"></div></div></div>
+        <div class="expense-amount" style="color:var(--info)">$1.25</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--success)"></div>
+        <div class="expense-name">GitHub<div class="sub">Source control + CI/CD</div></div>
+        <span class="expense-type free">Free</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:0%;background:var(--success)"></div></div></div>
+        <div class="expense-amount" style="color:var(--success)">$0.00</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--success)"></div>
+        <div class="expense-name">Sentry (free tier)<div class="sub">Error monitoring</div></div>
+        <span class="expense-type free">Free</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:0%;background:var(--success)"></div></div></div>
+        <div class="expense-amount" style="color:var(--success)">$0.00</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--success)"></div>
+        <div class="expense-name">Canva Live Embed<div class="sub">Core differentiator — zero API cost</div></div>
+        <span class="expense-type free">Free</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:0%;background:var(--success)"></div></div></div>
+        <div class="expense-amount" style="color:var(--success)">$0.00</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--success)"></div>
+        <div class="expense-name">Google Workspace<div class="sub">eric@boommedia.us + shared drives</div></div>
+        <span class="expense-type fixed">Fixed</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:18%;background:var(--info)"></div></div></div>
+        <div class="expense-amount" style="color:var(--info)">$6.00</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--info)"></div>
+        <div class="expense-name">Notion (team notes)<div class="sub">Product roadmap, docs, SOPs</div></div>
+        <span class="expense-type fixed">Fixed</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:13%;background:var(--info)"></div></div></div>
+        <div class="expense-amount" style="color:var(--info)">$4.00</div>
+      </div>
+
+      <div class="cat-total">
+        <span>Fixed Monthly Total</span>
+        <span style="color:var(--info)">$76.25</span>
+      </div>
+    </div>
+
+    <!-- Variable costs -->
+    <div class="card">
+      <div class="card-title">Variable Monthly Expenses</div>
+
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--warn)"></div>
+        <div class="expense-name">Stripe Processing Fees<div class="sub">2.9% + $0.30 per transaction (est. 100 customers)</div></div>
+        <span class="expense-type variable">Variable</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:100%;background:var(--warn)"></div></div></div>
+        <div class="expense-amount" style="color:var(--warn)">$178.70</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--warn)"></div>
+        <div class="expense-name">Anthropic API (Claude)<div class="sub">AI menu copy suggestions (optional feature)</div></div>
+        <span class="expense-type variable">Variable</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:20%;background:var(--warn)"></div></div></div>
+        <div class="expense-amount" style="color:var(--warn)">$8.00</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--warn)"></div>
+        <div class="expense-name">Make.com Automation<div class="sub">Canva → Servvee webhook scenarios</div></div>
+        <span class="expense-type variable">Variable</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:18%;background:var(--warn)"></div></div></div>
+        <div class="expense-amount" style="color:var(--warn)">$16.00</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--warn)"></div>
+        <div class="expense-name">Google Ads<div class="sub">Search intent ("menu update tool", "Canva menu")</div></div>
+        <span class="expense-type variable">Variable</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:50%;background:var(--warn)"></div></div></div>
+        <div class="expense-amount" style="color:var(--warn)">$200.00</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--warn)"></div>
+        <div class="expense-name">Social Media Ads (Meta)<div class="sub">Restaurant owner targeting via FB/IG</div></div>
+        <span class="expense-type variable">Variable</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:38%;background:var(--warn)"></div></div></div>
+        <div class="expense-amount" style="color:var(--warn)">$150.00</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--warn)"></div>
+        <div class="expense-name">Content / Copywriting<div class="sub">Blog posts, landing pages, ad copy</div></div>
+        <span class="expense-type variable">Variable</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:25%;background:var(--warn)"></div></div></div>
+        <div class="expense-amount" style="color:var(--warn)">$100.00</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--warn)"></div>
+        <div class="expense-name">Support Tools (Crisp/Intercom)<div class="sub">Live chat widget, help docs</div></div>
+        <span class="expense-type variable">Variable</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:10%;background:var(--warn)"></div></div></div>
+        <div class="expense-amount" style="color:var(--warn)">$19.00</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--success)"></div>
+        <div class="expense-name">Affiliate / Referral Payouts<div class="sub">20% first-month commission for referrals</div></div>
+        <span class="expense-type variable">Variable</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:15%;background:var(--warn)"></div></div></div>
+        <div class="expense-amount" style="color:var(--warn)">$58.00</div>
+      </div>
+      <div class="expense-row">
+        <div class="expense-dot" style="background:var(--warn)"></div>
+        <div class="expense-name">Miscellaneous / Tools<div class="sub">Figma, stock photos, software subscriptions</div></div>
+        <span class="expense-type variable">Variable</span>
+        <div class="expense-bar-wrap"><div class="expense-bar"><div class="expense-bar-fill" style="width:12%;background:var(--warn)"></div></div></div>
+        <div class="expense-amount" style="color:var(--warn)">$50.00</div>
+      </div>
+
+      <div class="cat-total">
+        <span>Variable Monthly Total</span>
+        <span style="color:var(--warn)">$779.70</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Budget breakdown visual -->
+  <div class="card" style="margin-bottom:28px;">
+    <div class="card-title">Budget Allocation by Category (% of $1,847 Total Burn)</div>
+    <div class="budget-breakdown">
+      <div class="budget-item">
+        <div class="budget-label">Marketing & Ads</div>
+        <div class="budget-track">
+          <div class="budget-fill" style="width:27%;background:var(--red);">27% — $500</div>
+        </div>
+        <div class="budget-pct" style="color:var(--red)">27%</div>
+      </div>
+      <div class="budget-item">
+        <div class="budget-label">Payment Fees (Stripe)</div>
+        <div class="budget-track">
+          <div class="budget-fill" style="width:10%;background:var(--warn);">10%</div>
+        </div>
+        <div class="budget-pct" style="color:var(--warn)">10%</div>
+      </div>
+      <div class="budget-item">
+        <div class="budget-label">Infrastructure</div>
+        <div class="budget-track">
+          <div class="budget-fill" style="width:4%;background:var(--info);">4%</div>
+        </div>
+        <div class="budget-pct" style="color:var(--info)">4%</div>
+      </div>
+      <div class="budget-item">
+        <div class="budget-label">Founder Draw</div>
+        <div class="budget-track">
+          <div class="budget-fill" style="width:62%;background:var(--starter);">62% — $1,150</div>
+        </div>
+        <div class="budget-pct" style="color:var(--starter)">62%</div>
+      </div>
+      <div class="budget-item">
+        <div class="budget-label">Content & Tools</div>
+        <div class="budget-track">
+          <div class="budget-fill" style="width:8%;background:var(--muted);">8%</div>
+        </div>
+        <div class="budget-pct" style="color:var(--muted2)">8%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly burn over time -->
+  <div class="section-label">Monthly Burn vs. Revenue — 12-Month View</div>
+  <div class="burn-table-wrap">
+    <table class="burn-table">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>MRR</th>
+          <th>Fixed Costs</th>
+          <th>Variable Costs</th>
+          <th>Founder Draw</th>
+          <th>Total Burn</th>
+          <th>Net Cash Flow</th>
+          <th>Cumulative P&L</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Jan 2026</td><td class="num-green">$580</td><td class="num-muted">$76</td><td class="num-yellow">$380</td><td class="num-muted">$0</td><td class="num-red">$456</td><td class="num-green">+$124</td><td class="num-green">+$124</td></tr>
+        <tr><td>Feb 2026</td><td class="num-green">$1,418</td><td class="num-muted">$76</td><td class="num-yellow">$400</td><td class="num-muted">$0</td><td class="num-red">$476</td><td class="num-green">+$942</td><td class="num-green">+$1,066</td></tr>
+        <tr><td>Mar 2026</td><td class="num-green">$2,540</td><td class="num-muted">$76</td><td class="num-yellow">$440</td><td class="num-muted">$500</td><td class="num-red">$1,016</td><td class="num-green">+$1,524</td><td class="num-green">+$2,590</td></tr>
+        <tr><td>Apr 2026</td><td class="num-green">$4,012</td><td class="num-muted">$76</td><td class="num-yellow">$480</td><td class="num-muted">$800</td><td class="num-red">$1,356</td><td class="num-green">+$2,656</td><td class="num-green">+$5,246</td></tr>
+        <tr><td>May 2026</td><td class="num-green">$5,849</td><td class="num-muted">$76</td><td class="num-yellow">$530</td><td class="num-muted">$1,150</td><td class="num-red">$1,756</td><td class="num-green">+$4,093</td><td class="num-green">+$9,339</td></tr>
+        <tr><td>Jun 2026</td><td class="num-green">$8,123</td><td class="num-muted">$76</td><td class="num-yellow">$580</td><td class="num-muted">$1,500</td><td class="num-red">$2,156</td><td class="num-green">+$5,967</td><td class="num-green">+$15,306</td></tr>
+        <tr><td>Jul 2026</td><td class="num-green">$10,741</td><td class="num-muted">$76</td><td class="num-yellow">$640</td><td class="num-muted">$2,000</td><td class="num-red">$2,716</td><td class="num-green">+$8,025</td><td class="num-green">+$23,331</td></tr>
+        <tr><td>Aug 2026</td><td class="num-green">$13,763</td><td class="num-muted">$76</td><td class="num-yellow">$700</td><td class="num-muted">$2,500</td><td class="num-red">$3,276</td><td class="num-green">+$10,487</td><td class="num-green">+$33,818</td></tr>
+        <tr><td>Sep 2026</td><td class="num-green">$17,063</td><td class="num-muted">$76</td><td class="num-yellow">$760</td><td class="num-muted">$3,000</td><td class="num-red">$3,836</td><td class="num-green">+$13,227</td><td class="num-green">+$47,045</td></tr>
+        <tr><td>Oct 2026</td><td class="num-green">$20,604</td><td class="num-muted">$76</td><td class="num-yellow">$820</td><td class="num-muted">$3,500</td><td class="num-red">$4,396</td><td class="num-green">+$16,208</td><td class="num-green">+$63,253</td></tr>
+        <tr><td>Nov 2026</td><td class="num-green">$24,225</td><td class="num-muted">$76</td><td class="num-yellow">$880</td><td class="num-muted">$4,000</td><td class="num-red">$4,956</td><td class="num-green">+$19,269</td><td class="num-green">+$82,522</td></tr>
+        <tr><td>Dec 2026</td><td class="num-green">$27,979</td><td class="num-muted">$76</td><td class="num-yellow">$940</td><td class="num-muted">$5,000</td><td class="num-red">$6,016</td><td class="num-green">+$21,963</td><td class="num-green">+$104,485</td></tr>
+        <tr>
+          <td>YTD Total</td>
+          <td class="num-green">$136,897</td>
+          <td class="num-muted">$912</td>
+          <td class="num-yellow">$7,550</td>
+          <td class="num-muted">$23,950</td>
+          <td class="num-red">$32,412</td>
+          <td class="num-green">+$104,485</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- One-time setup costs -->
+  <div class="section-label">One-Time Setup Costs (Year 1 Only)</div>
+  <div class="one-time-grid">
+    <div class="one-time-item">
+      <div class="one-time-name">Logo & Brand Identity</div>
+      <div class="one-time-desc">Canva Pro or Fiverr designer for Servvee mark + brand guide</div>
+      <div class="one-time-cost">$150</div>
+    </div>
+    <div class="one-time-item">
+      <div class="one-time-name">Legal Entity (LLC)</div>
+      <div class="one-time-desc">State filing + registered agent (first year)</div>
+      <div class="one-time-cost">$300</div>
+    </div>
+    <div class="one-time-item">
+      <div class="one-time-name">Terms / Privacy Policy</div>
+      <div class="one-time-desc">Termly or lawyer-reviewed template</div>
+      <div class="one-time-cost">$99</div>
+    </div>
+    <div class="one-time-item">
+      <div class="one-time-name">Figma Design License</div>
+      <div class="one-time-desc">Professional plan for UI design (annual)</div>
+      <div class="one-time-cost">$180</div>
+    </div>
+    <div class="one-time-item">
+      <div class="one-time-name">Product Hunt Launch</div>
+      <div class="one-time-desc">Ship Kit + social promotion budget</div>
+      <div class="one-time-cost">$200</div>
+    </div>
+    <div class="one-time-item">
+      <div class="one-time-name">AppSumo Listing Fee</div>
+      <div class="one-time-desc">Optional LTD launch for user acquisition spike</div>
+      <div class="one-time-cost">$0</div>
+    </div>
+    <div class="one-time-item">
+      <div class="one-time-name">Initial Ad Creative</div>
+      <div class="one-time-desc">Video editor / copywriter for first campaign assets</div>
+      <div class="one-time-cost">$400</div>
+    </div>
+    <div class="one-time-item">
+      <div class="one-time-name">Accountant / Bookkeeper</div>
+      <div class="one-time-desc">Tax setup, Stripe revenue recognition, annual filing</div>
+      <div class="one-time-cost">$600</div>
+    </div>
+    <div class="one-time-item">
+      <div class="one-time-name">Miscellaneous Setup</div>
+      <div class="one-time-desc">Hardware, software licenses, test restaurant accounts</div>
+      <div class="one-time-cost">$250</div>
+    </div>
+  </div>
+  <div style="font-size:12px;color:var(--muted2);text-align:right;margin-top:-16px;margin-bottom:28px;">Total one-time: <strong style="color:var(--starter)">$2,179</strong></div>
+
+  <!-- Runway calculator -->
+  <div class="runway-card">
+    <div class="runway-title">Cash Runway Scenarios (Starting Capital)</div>
+    <div class="runway-rows">
+      <div class="runway-scenario">
+        <div class="runway-scenario-label">Bootstrap — $5K Capital</div>
+        <div class="runway-months" style="color:var(--warn)">11</div>
+        <div style="font-size:13px;font-weight:700;color:var(--warn)">Months of runway</div>
+        <div class="runway-detail">Assumes $456 avg burn pre-revenue. Break-even at Month 2 given $580 launch MRR.</div>
+      </div>
+      <div class="runway-scenario">
+        <div class="runway-scenario-label">Modest — $15K Capital</div>
+        <div class="runway-months" style="color:var(--success)">24+</div>
+        <div style="font-size:13px;font-weight:700;color:var(--success)">Months of runway</div>
+        <div class="runway-detail">Comfortable buffer. Can invest $500–700/mo into paid acquisition from Day 1.</div>
+      </div>
+      <div class="runway-scenario">
+        <div class="runway-scenario-label">Funded — $50K Capital</div>
+        <div class="runway-months" style="color:var(--info)">48+</div>
+        <div style="font-size:13px;font-weight:700;color:var(--info)">Months of runway</div>
+        <div class="runway-detail">Can hire part-time support, scale ads to $2K/mo, accelerate to aggressive growth scenario.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

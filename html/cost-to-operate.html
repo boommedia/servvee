@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Servvee — Cost to Operate</title>
+<style>
+  :root {
+    --red: #FF4444; --red-hover: #FF6B6B; --red-dim: #CC3333;
+    --bg: #090606; --surface: #150D0D; --surface2: #1A1010;
+    --border: #2A1515; --border2: #3A1F1F;
+    --text: #F0E0E0; --muted: #7A5555; --muted2: #9A6666;
+    --success: #4ADE80; --warn: #FBBF24; --info: #60A5FA;
+    --starter: #A78BFA; --pro: #FF4444; --agency: #FBBF24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; font-size: 13px; min-height: 100vh; }
+
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo span { color: var(--red); }
+  .header-meta { color: var(--muted); font-size: 11px; }
+
+  .wrapper { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+  .page-title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .page-sub { color: var(--muted2); font-size: 12px; margin-bottom: 28px; }
+  .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 12px; }
+
+  /* KPI strip */
+  .kpi-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 28px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .kpi .val { font-size: 22px; font-weight: 800; line-height: 1; }
+  .kpi .lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-top: 6px; }
+  .kpi .trend { font-size: 10px; margin-top: 3px; }
+  .kpi.red-accent { border-color: rgba(255,68,68,0.3); background: rgba(255,68,68,0.05); }
+  .kpi.green-accent { border-color: rgba(74,222,128,0.3); background: rgba(74,222,128,0.05); }
+
+  /* Main infra table */
+  .infra-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 28px; }
+  .infra-table { width: 100%; border-collapse: collapse; }
+  .infra-table thead { background: var(--surface2); }
+  .infra-table th { padding: 10px 14px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); text-align: left; }
+  .infra-table th.right { text-align: right; }
+  .infra-table td { padding: 10px 14px; border-top: 1px solid var(--border); font-size: 12px; vertical-align: top; }
+  .infra-table td.right { text-align: right; font-weight: 700; }
+  .infra-table tr.section-header td { background: var(--surface2); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); padding: 7px 14px; }
+  .infra-table tr:hover td { background: rgba(255,68,68,0.03); }
+  .infra-table tr.subtotal td { background: rgba(255,68,68,0.04); border-top: 2px solid var(--border2); font-weight: 700; }
+  .infra-table tr.total-row td { background: rgba(255,68,68,0.08); border-top: 2px solid rgba(255,68,68,0.3); font-weight: 800; font-size: 14px; }
+  .badge-fixed { display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 9px; font-weight: 700; text-transform: uppercase; background: rgba(96,165,250,0.12); color: var(--info); border: 1px solid rgba(96,165,250,0.2); }
+  .badge-variable { display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 9px; font-weight: 700; text-transform: uppercase; background: rgba(251,191,36,0.12); color: var(--warn); border: 1px solid rgba(251,191,36,0.2); }
+  .badge-free { display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 9px; font-weight: 700; text-transform: uppercase; background: rgba(74,222,128,0.12); color: var(--success); border: 1px solid rgba(74,222,128,0.2); }
+  .service-name { font-weight: 700; }
+  .service-desc { font-size: 11px; color: var(--muted2); margin-top: 2px; }
+
+  /* Per-unit cost breakdown */
+  .per-tier { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+  .tier-cost-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .tier-cost-card.starter { border-top: 3px solid var(--starter); }
+  .tier-cost-card.pro { border-top: 3px solid var(--red); }
+  .tier-cost-card.agency { border-top: 3px solid var(--agency); }
+  .tier-cost-name { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 12px; }
+  .tier-cost-card.starter .tier-cost-name { color: var(--starter); }
+  .tier-cost-card.pro .tier-cost-name { color: var(--red); }
+  .tier-cost-card.agency .tier-cost-name { color: var(--agency); }
+  .margin-row { display: flex; justify-content: space-between; margin-bottom: 7px; font-size: 11px; padding-bottom: 7px; border-bottom: 1px solid var(--border); }
+  .margin-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .margin-row label { color: var(--muted2); }
+  .margin-row .val { font-weight: 700; }
+  .gross-margin { font-size: 22px; font-weight: 900; }
+
+  /* Stripe fee calculator */
+  .stripe-calc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 28px; }
+  .stripe-calc-title { font-size: 13px; font-weight: 700; margin-bottom: 16px; }
+  .stripe-scenarios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .stripe-scenario { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+  .stripe-scenario-name { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 10px; }
+  .stripe-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; }
+  .stripe-row label { color: var(--muted2); }
+  .stripe-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+  .stripe-net { font-size: 13px; font-weight: 800; }
+
+  /* Cost scaling projection */
+  .scaling-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 28px; }
+  .scaling-table { width: 100%; border-collapse: collapse; }
+  .scaling-table th { padding: 10px 14px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); text-align: right; background: var(--surface2); }
+  .scaling-table th:first-child { text-align: left; }
+  .scaling-table td { padding: 9px 14px; border-top: 1px solid var(--border); font-size: 12px; text-align: right; }
+  .scaling-table td:first-child { text-align: left; font-weight: 600; color: var(--muted2); }
+  .scaling-table tr:hover td { background: rgba(255,68,68,0.03); }
+  .scaling-table tr.highlight-row td { background: rgba(255,68,68,0.05); font-weight: 700; }
+  .green { color: var(--success); font-weight: 700; }
+  .red { color: var(--red); font-weight: 700; }
+  .yellow { color: var(--warn); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Serv<span>vee</span></div>
+  <div class="header-meta">Cost to Operate &nbsp;·&nbsp; Infrastructure & Platform Economics &nbsp;·&nbsp; May 2026</div>
+</div>
+
+<div class="wrapper">
+  <div class="page-title">Cost to Operate</div>
+  <div class="page-sub">Monthly infrastructure, platform fees, and unit economics. Assumes 100 paying customers (base). All costs in USD.</div>
+
+  <!-- KPI strip -->
+  <div class="kpi-strip">
+    <div class="kpi red-accent">
+      <div class="val" style="color:var(--red)">$497</div>
+      <div class="lbl">Fixed Monthly COGS</div>
+      <div class="trend" style="color:var(--muted2)">At 100 customers</div>
+    </div>
+    <div class="kpi">
+      <div class="val" style="color:var(--warn)">$4.97</div>
+      <div class="lbl">Cost Per Customer</div>
+      <div class="trend" style="color:var(--success)">↓ as scale grows</div>
+    </div>
+    <div class="kpi green-accent">
+      <div class="val" style="color:var(--success)">82.8%</div>
+      <div class="lbl">Gross Margin (Starter)</div>
+      <div class="trend" style="color:var(--success)">↑ target 88% at scale</div>
+    </div>
+    <div class="kpi">
+      <div class="val" style="color:var(--info)">$1.44</div>
+      <div class="lbl">Canva Embed Cost</div>
+      <div class="trend" style="color:var(--success)">Free — $0 API fees</div>
+    </div>
+    <div class="kpi">
+      <div class="val" style="color:var(--starter)">2.9%</div>
+      <div class="lbl">Stripe Transaction Fee</div>
+      <div class="trend" style="color:var(--muted2)">+ $0.30 per charge</div>
+    </div>
+  </div>
+
+  <!-- Infrastructure table -->
+  <div class="section-label">Monthly Infrastructure Costs — 100 Customers</div>
+  <div class="infra-wrap">
+    <table class="infra-table">
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th>Plan / Usage</th>
+          <th>Type</th>
+          <th class="right">Monthly Cost</th>
+          <th class="right">Annual Cost</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="section-header"><td colspan="6">▸ Core Infrastructure</td></tr>
+        <tr>
+          <td><div class="service-name">Supabase</div><div class="service-desc">Auth, PostgreSQL, Storage, Realtime</div></td>
+          <td>Pro plan</td>
+          <td><span class="badge-fixed">Fixed</span></td>
+          <td class="right">$25.00</td>
+          <td class="right">$300</td>
+          <td style="font-size:11px;color:var(--muted2)">Includes 8GB DB, 100GB bandwidth, 500K Edge calls</td>
+        </tr>
+        <tr>
+          <td><div class="service-name">Vercel</div><div class="service-desc">Next.js hosting, edge functions, analytics</div></td>
+          <td>Pro plan</td>
+          <td><span class="badge-fixed">Fixed</span></td>
+          <td class="right">$20.00</td>
+          <td class="right">$240</td>
+          <td style="font-size:11px;color:var(--muted2)">Unlimited deployments; serverless function execution</td>
+        </tr>
+        <tr>
+          <td><div class="service-name">Custom Domain</div><div class="service-desc">servvee.online annual registration</div></td>
+          <td>Annual / amortized</td>
+          <td><span class="badge-fixed">Fixed</span></td>
+          <td class="right">$1.25</td>
+          <td class="right">$15</td>
+          <td style="font-size:11px;color:var(--muted2)">Namecheap .online TLD</td>
+        </tr>
+        <tr class="section-header"><td colspan="6">▸ Communication & Email</td></tr>
+        <tr>
+          <td><div class="service-name">Resend</div><div class="service-desc">Transactional email (welcome, billing, alerts)</div></td>
+          <td>Pro ($20/mo)</td>
+          <td><span class="badge-fixed">Fixed</span></td>
+          <td class="right">$20.00</td>
+          <td class="right">$240</td>
+          <td style="font-size:11px;color:var(--muted2)">50K emails/mo; well within limits at 100 customers</td>
+        </tr>
+        <tr class="section-header"><td colspan="6">▸ Payment Processing</td></tr>
+        <tr>
+          <td><div class="service-name">Stripe</div><div class="service-desc">Subscription billing, invoicing, webhooks</div></td>
+          <td>2.9% + $0.30/txn</td>
+          <td><span class="badge-variable">Variable</span></td>
+          <td class="right">$178.70</td>
+          <td class="right">$2,144</td>
+          <td style="font-size:11px;color:var(--muted2)">Assumes blended ARPU $48 × 100 customers = $4,800 MRR</td>
+        </tr>
+        <tr class="section-header"><td colspan="6">▸ Design Integrations</td></tr>
+        <tr>
+          <td><div class="service-name">Canva Live Embed</div><div class="service-desc">Public /view?embed iFrame — no API key needed</div></td>
+          <td>Canva free publish</td>
+          <td><span class="badge-free">Free</span></td>
+          <td class="right">$0.00</td>
+          <td class="right">$0</td>
+          <td style="font-size:11px;color:var(--muted2)">Major cost advantage — zero per-embed API fees</td>
+        </tr>
+        <tr>
+          <td><div class="service-name">Adobe Express Embed</div><div class="service-desc">Published page URL iframed directly</div></td>
+          <td>Client's own account</td>
+          <td><span class="badge-free">Free</span></td>
+          <td class="right">$0.00</td>
+          <td class="right">$0</td>
+          <td style="font-size:11px;color:var(--muted2)">Client pays Adobe; Servvee just hosts the iframe</td>
+        </tr>
+        <tr class="section-header"><td colspan="6">▸ Developer Tools</td></tr>
+        <tr>
+          <td><div class="service-name">GitHub</div><div class="service-desc">Source control, CI/CD Actions</div></td>
+          <td>Free tier</td>
+          <td><span class="badge-free">Free</span></td>
+          <td class="right">$0.00</td>
+          <td class="right">$0</td>
+          <td style="font-size:11px;color:var(--muted2)">Vercel deploys on push; no extra CI needed</td>
+        </tr>
+        <tr>
+          <td><div class="service-name">Sentry (error monitoring)</div><div class="service-desc">Error tracking, performance</div></td>
+          <td>Developer (free)</td>
+          <td><span class="badge-free">Free</span></td>
+          <td class="right">$0.00</td>
+          <td class="right">$0</td>
+          <td style="font-size:11px;color:var(--muted2)">Upgrade to Team $26/mo if needed at scale</td>
+        </tr>
+        <tr class="section-header"><td colspan="6">▸ AI Features (future)</td></tr>
+        <tr>
+          <td><div class="service-name">Anthropic API</div><div class="service-desc">Claude for menu copy suggestions, promo naming</div></td>
+          <td>Pay-per-use</td>
+          <td><span class="badge-variable">Variable</span></td>
+          <td class="right">$8.00</td>
+          <td class="right">$96</td>
+          <td style="font-size:11px;color:var(--muted2)">Est. 200 AI calls/mo × $0.04 avg — optional feature</td>
+        </tr>
+        <tr class="subtotal">
+          <td colspan="3">Total Monthly Infrastructure Cost</td>
+          <td class="right" style="color:var(--red);font-size:14px">$252.95</td>
+          <td class="right" style="color:var(--warn)">$3,035</td>
+          <td>Excl. Stripe fees</td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="3">Total COGS (incl. Stripe @ $4,800 MRR)</td>
+          <td class="right" style="color:var(--red)">$431.65</td>
+          <td class="right" style="color:var(--warn)">$5,180</td>
+          <td style="font-size:11px;color:var(--success)">8.99% COGS ratio on $4,800 MRR</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Per-tier unit economics -->
+  <div class="section-label">Unit Economics by Tier</div>
+  <div class="per-tier">
+    <div class="tier-cost-card starter">
+      <div class="tier-cost-name">Starter — $29/mo</div>
+      <div class="margin-row"><label>Revenue</label><div class="val" style="color:var(--text)">$29.00</div></div>
+      <div class="margin-row"><label>Stripe fee (2.9% + $0.30)</label><div class="val" style="color:var(--red)">−$1.14</div></div>
+      <div class="margin-row"><label>Infra cost per seat</label><div class="val" style="color:var(--red)">−$2.53</div></div>
+      <div class="margin-row"><label>Net revenue per seat</label><div class="val" style="color:var(--success)">$25.33</div></div>
+      <div class="margin-row" style="border-bottom:none;">
+        <label>Gross Margin</label>
+        <div class="gross-margin" style="color:var(--success)">87.3%</div>
+      </div>
+    </div>
+    <div class="tier-cost-card pro">
+      <div class="tier-cost-name">Pro — $79/mo</div>
+      <div class="margin-row"><label>Revenue</label><div class="val" style="color:var(--text)">$79.00</div></div>
+      <div class="margin-row"><label>Stripe fee (2.9% + $0.30)</label><div class="val" style="color:var(--red)">−$2.59</div></div>
+      <div class="margin-row"><label>Infra cost per seat</label><div class="val" style="color:var(--red)">−$2.53</div></div>
+      <div class="margin-row"><label>Net revenue per seat</label><div class="val" style="color:var(--success)">$73.88</div></div>
+      <div class="margin-row" style="border-bottom:none;">
+        <label>Gross Margin</label>
+        <div class="gross-margin" style="color:var(--success)">93.5%</div>
+      </div>
+    </div>
+    <div class="tier-cost-card agency">
+      <div class="tier-cost-name">Agency — $199/mo</div>
+      <div class="margin-row"><label>Revenue</label><div class="val" style="color:var(--text)">$199.00</div></div>
+      <div class="margin-row"><label>Stripe fee (2.9% + $0.30)</label><div class="val" style="color:var(--red)">−$6.07</div></div>
+      <div class="margin-row"><label>Infra cost per seat</label><div class="val" style="color:var(--red)">−$2.53</div></div>
+      <div class="margin-row"><label>Net revenue per seat</label><div class="val" style="color:var(--success)">$190.40</div></div>
+      <div class="margin-row" style="border-bottom:none;">
+        <label>Gross Margin</label>
+        <div class="gross-margin" style="color:var(--success)">95.7%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stripe scenarios -->
+  <div class="stripe-calc">
+    <div class="stripe-calc-title">Stripe Fee Scenarios by Customer Mix</div>
+    <div class="stripe-scenarios">
+      <div class="stripe-scenario">
+        <div class="stripe-scenario-name">Early Stage — 100 Customers</div>
+        <div class="stripe-row"><label>Starter (70 × $29)</label><span>$2,030</span></div>
+        <div class="stripe-row"><label>Pro (22 × $79)</label><span>$1,738</span></div>
+        <div class="stripe-row"><label>Agency (8 × $199)</label><span>$1,592</span></div>
+        <hr class="stripe-divider">
+        <div class="stripe-row"><label>Gross MRR</label><span style="font-weight:700">$5,360</span></div>
+        <div class="stripe-row"><label>Stripe fees (est.)</label><span style="color:var(--red)">−$185.74</span></div>
+        <div class="stripe-row"><label>Net MRR after fees</label><div class="stripe-net" style="color:var(--success)">$5,174</div></div>
+      </div>
+      <div class="stripe-scenario">
+        <div class="stripe-scenario-name">Mid Stage — 250 Customers</div>
+        <div class="stripe-row"><label>Starter (160 × $29)</label><span>$4,640</span></div>
+        <div class="stripe-row"><label>Pro (65 × $79)</label><span>$5,135</span></div>
+        <div class="stripe-row"><label>Agency (25 × $199)</label><span>$4,975</span></div>
+        <hr class="stripe-divider">
+        <div class="stripe-row"><label>Gross MRR</label><span style="font-weight:700">$14,750</span></div>
+        <div class="stripe-row"><label>Stripe fees (est.)</label><span style="color:var(--red)">−$503.05</span></div>
+        <div class="stripe-row"><label>Net MRR after fees</label><div class="stripe-net" style="color:var(--success)">$14,247</div></div>
+      </div>
+      <div class="stripe-scenario">
+        <div class="stripe-scenario-name">Scale — 500 Customers</div>
+        <div class="stripe-row"><label>Starter (300 × $29)</label><span>$8,700</span></div>
+        <div class="stripe-row"><label>Pro (140 × $79)</label><span>$11,060</span></div>
+        <div class="stripe-row"><label>Agency (60 × $199)</label><span>$11,940</span></div>
+        <hr class="stripe-divider">
+        <div class="stripe-row"><label>Gross MRR</label><span style="font-weight:700">$31,700</span></div>
+        <div class="stripe-row"><label>Stripe fees (est.)</label><span style="color:var(--red)">−$1,069.30</span></div>
+        <div class="stripe-row"><label>Net MRR after fees</label><div class="stripe-net" style="color:var(--success)">$30,631</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cost scaling table -->
+  <div class="section-label">Infrastructure Cost Scaling</div>
+  <div class="scaling-wrap">
+    <table class="scaling-table">
+      <thead>
+        <tr>
+          <th>Customer Count</th>
+          <th>Est. MRR</th>
+          <th>Fixed Infra</th>
+          <th>Stripe Fees</th>
+          <th>Total COGS</th>
+          <th>COGS %</th>
+          <th>Gross Profit</th>
+          <th>Gross Margin</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>50 customers</td><td>$2,400</td><td>$66.25</td><td class="red">$99.90</td><td class="red">$166</td><td>6.9%</td><td class="green">$2,234</td><td class="green">93.1%</td></tr>
+        <tr><td>100 customers</td><td>$4,800</td><td>$66.25</td><td class="red">$178.70</td><td class="red">$245</td><td>5.1%</td><td class="green">$4,555</td><td class="green">94.9%</td></tr>
+        <tr class="highlight-row"><td>250 customers</td><td>$12,000</td><td>$91.25</td><td class="red">$438.30</td><td class="red">$530</td><td>4.4%</td><td class="green">$11,470</td><td class="green">95.6%</td></tr>
+        <tr><td>500 customers</td><td>$28,000</td><td>$116.25</td><td class="red">$1,012</td><td class="red">$1,128</td><td>4.0%</td><td class="green">$26,872</td><td class="green">96.0%</td></tr>
+        <tr><td>1,000 customers</td><td>$56,000</td><td>$216.25</td><td class="red">$2,024</td><td class="red">$2,240</td><td>4.0%</td><td class="green">$53,760</td><td class="green">96.0%</td></tr>
+        <tr><td>2,500 customers</td><td>$140,000</td><td>$341.25</td><td class="red">$5,060</td><td class="red">$5,401</td><td>3.9%</td><td class="green">$134,599</td><td class="green">96.1%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

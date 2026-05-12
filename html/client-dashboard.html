@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Servvee — Client Dashboard (Restaurant Owner View)</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #090606; color: #F0E0E0; display: flex; min-height: 100vh; }
+
+.sidebar { width: 220px; flex-shrink: 0; background: #120D0D; border-right: 1px solid #2A1515; padding: 0; display: flex; flex-direction: column; }
+.sidebar-logo { padding: 22px 20px 18px; border-bottom: 1px solid #2A1515; }
+.sidebar-logo-row { display: flex; align-items: center; gap: 9px; margin-bottom: 5px; }
+.logo-icon { width: 30px; height: 30px; background: #FF4444; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+.logo-text { font-weight: 900; font-size: 17px; color: #F0E0E0; }
+.logo-sub  { font-size: 9px; font-weight: 800; color: #FF4444; letter-spacing: 0.1em; text-transform: uppercase; }
+.nav { padding: 14px 12px; flex: 1; }
+.nav-item { display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-radius: 8px; font-size: 13px; color: #7A5555; margin-bottom: 3px; cursor: pointer; border: 1px solid transparent; }
+.nav-item.active { color: #FF6B6B; background: rgba(255,68,68,0.08); border-color: rgba(255,68,68,0.2); font-weight: 700; }
+.sidebar-footer { padding: 16px 12px; border-top: 1px solid #2A1515; }
+.plan-badge { background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.2); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+.plan-name { font-size: 12px; font-weight: 800; color: #FF6B6B; margin-bottom: 2px; }
+.plan-renew { font-size: 10px; color: #5a3535; }
+
+.main { flex: 1; padding: 28px 32px; overflow-x: hidden; }
+.page-title { font-size: 22px; font-weight: 900; color: #F0E0E0; margin-bottom: 4px; }
+.page-sub { font-size: 12px; color: #7A5555; margin-bottom: 28px; }
+
+.card { background: #150D0D; border: 1px solid #2A1515; border-radius: 14px; overflow: hidden; }
+.card-hdr { padding: 13px 20px; font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #7A5555; background: #1A1010; border-bottom: 1px solid #2A1515; display: flex; justify-content: space-between; align-items: center; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.kpi { background: #150D0D; border: 1px solid #2A1515; border-radius: 14px; padding: 18px 20px; position: relative; overflow: hidden; }
+.kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.kpi.red::before { background: #FF4444; }
+.kpi.green::before { background: #4ADE80; }
+.kpi.yellow::before { background: #FBBF24; }
+.kpi-val { font-size: 26px; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 4px; }
+.kpi.red .kpi-val { color: #FF6B6B; }
+.kpi.green .kpi-val { color: #4ADE80; }
+.kpi.yellow .kpi-val { color: #FBBF24; }
+.kpi-label { font-size: 10px; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: #7A5555; margin-bottom: 6px; }
+.kpi-val { color: #F0E0E0; }
+
+.pill { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 800; letter-spacing: 0.05em; white-space: nowrap; }
+.pill-live    { background: rgba(74,222,128,0.12);  border: 1px solid rgba(74,222,128,0.25); color: #4ADE80; }
+.pill-sched   { background: rgba(251,191,36,0.10);  border: 1px solid rgba(251,191,36,0.25); color: #FBBF24; }
+.pill-default { background: rgba(255,68,68,0.08);   border: 1px solid rgba(255,68,68,0.2);   color: #FF6B6B; }
+.pill-off     { background: rgba(122,85,85,0.08);   border: 1px solid rgba(122,85,85,0.2);   color: #7A5555; }
+
+.btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+.btn-primary { background: #FF4444; color: #fff; border-color: #FF4444; box-shadow: 0 4px 12px rgba(255,68,68,0.3); }
+.btn-ghost   { background: transparent; border-color: #2A1515; color: #7A5555; }
+.btn-sm { padding: 4px 10px; font-size: 11px; }
+
+.menu-row { display: flex; align-items: flex-start; gap: 14px; background: #1A1010; border: 1px solid #2A1515; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; transition: border-color 0.15s; }
+.menu-row:hover { border-color: rgba(255,68,68,0.25); }
+.menu-name { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+.menu-meta { font-size: 11px; color: #7A5555; margin-bottom: 7px; }
+.menu-meta code { color: #FF6B6B; background: rgba(255,68,68,0.08); padding: 1px 5px; border-radius: 4px; font-size: 10px; }
+
+.snippet { background: #120D0D; border: 1px solid #2A1515; border-radius: 7px; padding: 10px 12px; font-family: monospace; font-size: 10px; color: #FF6B6B; word-break: break-all; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-row">
+      <div class="logo-icon">🍽</div>
+      <span class="logo-text">Servvee</span>
+    </div>
+    <div class="logo-sub">La Bella Cucina</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-item active">📊 &nbsp;Dashboard</div>
+    <div class="nav-item">🍽 &nbsp;My Menus</div>
+    <div class="nav-item">📅 &nbsp;Schedules</div>
+    <div class="nav-item">📱 &nbsp;QR Codes</div>
+    <div class="nav-item">📈 &nbsp;Analytics</div>
+    <div class="nav-item">⚙️ &nbsp;Settings</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="plan-badge">
+      <div class="plan-name">Pro Plan · $79/mo</div>
+      <div class="plan-renew">Renews Jun 11, 2025</div>
+    </div>
+    <div style="font-size:11px;color:#5a3535;">owner@labellacu.com</div>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<main class="main">
+  <div class="page-title">Good afternoon, Marco 👋</div>
+  <div class="page-sub">La Bella Cucina · Miami, FL · Pro Plan · Monday, May 12, 2025</div>
+
+  <!-- Live alert -->
+  <div style="background:rgba(74,222,128,0.07);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:12px 18px;margin-bottom:24px;display:flex;align-items:center;gap:10px;">
+    <span style="width:8px;height:8px;border-radius:50%;background:#4ADE80;box-shadow:0 0 6px #4ADE80;flex-shrink:0;"></span>
+    <span style="font-size:13px;font-weight:700;color:#4ADE80;">Spring Tasting Menu is LIVE</span>
+    <span style="font-size:12px;color:#7A5555;">— active until May 31 · Auto-reverts to Main Menu on Jun 1</span>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi red">
+      <div class="kpi-label">Active Menus</div>
+      <div class="kpi-val" style="color:#FF6B6B;">4</div>
+      <div style="font-size:11px;color:#5a3535;margin-top:4px;">1 holiday promo live</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Total Embed Views (30d)</div>
+      <div class="kpi-val">3,840</div>
+      <div style="font-size:11px;color:#4ADE80;margin-top:4px;">↑ +18% vs last month</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">Est. Hours Saved / mo</div>
+      <div class="kpi-val" style="color:#4ADE80;">16h</div>
+      <div style="font-size:11px;color:#5a3535;margin-top:4px;">4 menus × 4 hrs avg</div>
+    </div>
+    <div class="kpi yellow">
+      <div class="kpi-label">Est. Revenue Lift (Holiday)</div>
+      <div class="kpi-val" style="color:#FBBF24;">$750+</div>
+      <div style="font-size:11px;color:#5a3535;margin-top:4px;">Spring promo active</div>
+    </div>
+  </div>
+
+  <!-- Menus -->
+  <div class="card" style="margin-bottom:24px;">
+    <div class="card-hdr">
+      <span>My Menus &amp; Promos (4)</span>
+      <a href="#" class="btn btn-primary btn-sm" style="border-radius:6px;">+ Add Menu</a>
+    </div>
+    <div style="padding:16px 16px;">
+
+      <!-- Menu row 1 — holiday live -->
+      <div class="menu-row" style="border-color:rgba(74,222,128,0.2);">
+        <span class="pill pill-live">LIVE</span>
+        <div style="flex:1;min-width:0;">
+          <div class="menu-name">Spring Tasting Menu</div>
+          <div class="menu-meta">
+            🎨 Adobe Express &nbsp;·&nbsp; slot: <code>spring</code> &nbsp;·&nbsp; Apr 15 → May 31
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <div class="snippet" style="flex:1;">&lt;iframe src="https://servvee.online/embed/usr_abc.../spring" style="width:100%;height:600px;border:none;" allowfullscreen&gt;&lt;/iframe&gt;</div>
+          </div>
+        </div>
+        <div style="flex-shrink:0;background:#fff;border-radius:8px;padding:3px;width:68px;height:68px;display:flex;align-items:center;justify-content:center;">
+          <div style="width:58px;height:58px;background:repeating-conic-gradient(#000 0% 25%,#fff 0% 50%) 0/10px 10px;"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
+          <a href="#" class="btn btn-ghost btn-sm">Preview</a>
+          <a href="#" class="btn btn-ghost btn-sm">Edit Design</a>
+          <a href="#" class="btn btn-ghost btn-sm">Edit</a>
+        </div>
+      </div>
+
+      <!-- Menu row 2 — standard/default -->
+      <div class="menu-row">
+        <span class="pill pill-default">DEFAULT</span>
+        <div style="flex:1;min-width:0;">
+          <div class="menu-name">Main Dinner Menu</div>
+          <div class="menu-meta">
+            🎨 Canva &nbsp;·&nbsp; slot: <code>default</code> &nbsp;·&nbsp; Standard (no date)
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <div class="snippet" style="flex:1;">&lt;iframe src="https://servvee.online/embed/usr_abc.../default" style="width:100%;height:600px;border:none;" allowfullscreen&gt;&lt;/iframe&gt;</div>
+          </div>
+        </div>
+        <div style="flex-shrink:0;background:#fff;border-radius:8px;padding:3px;width:68px;height:68px;display:flex;align-items:center;justify-content:center;">
+          <div style="width:58px;height:58px;background:repeating-conic-gradient(#000 0% 25%,#fff 0% 50%) 0/10px 10px;"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
+          <a href="#" class="btn btn-ghost btn-sm">Preview</a>
+          <a href="#" class="btn btn-ghost btn-sm">Edit Design</a>
+          <a href="#" class="btn btn-ghost btn-sm">Edit</a>
+        </div>
+      </div>
+
+      <!-- Menu row 3 — scheduled -->
+      <div class="menu-row">
+        <span class="pill pill-sched">SCHEDULED</span>
+        <div style="flex:1;min-width:0;">
+          <div class="menu-name">Summer BBQ Menu</div>
+          <div class="menu-meta">
+            🎨 Canva &nbsp;·&nbsp; slot: <code>summer</code> &nbsp;·&nbsp; Jun 1 → Aug 31
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <div class="snippet" style="flex:1;">&lt;iframe src="https://servvee.online/embed/usr_abc.../summer" …&gt;&lt;/iframe&gt;</div>
+          </div>
+        </div>
+        <div style="flex-shrink:0;background:#fff;border-radius:8px;padding:3px;width:68px;height:68px;display:flex;align-items:center;justify-content:center;">
+          <div style="width:58px;height:58px;background:repeating-conic-gradient(#000 0% 25%,#fff 0% 50%) 0/10px 10px;"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
+          <a href="#" class="btn btn-ghost btn-sm">Preview</a>
+          <a href="#" class="btn btn-ghost btn-sm">Edit Design</a>
+          <a href="#" class="btn btn-ghost btn-sm">Edit</a>
+        </div>
+      </div>
+
+      <!-- Menu row 4 — drinks -->
+      <div class="menu-row">
+        <span class="pill pill-default">DEFAULT</span>
+        <div style="flex:1;min-width:0;">
+          <div class="menu-name">Cocktail &amp; Wine List</div>
+          <div class="menu-meta">
+            ✦ Adobe Express &nbsp;·&nbsp; slot: <code>drinks</code> &nbsp;·&nbsp; Standard
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <div class="snippet" style="flex:1;">&lt;iframe src="https://servvee.online/embed/usr_abc.../drinks" …&gt;&lt;/iframe&gt;</div>
+          </div>
+        </div>
+        <div style="flex-shrink:0;background:#fff;border-radius:8px;padding:3px;width:68px;height:68px;display:flex;align-items:center;justify-content:center;">
+          <div style="width:58px;height:58px;background:repeating-conic-gradient(#000 0% 25%,#fff 0% 50%) 0/10px 10px;"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
+          <a href="#" class="btn btn-ghost btn-sm">Preview</a>
+          <a href="#" class="btn btn-ghost btn-sm">Edit Design</a>
+          <a href="#" class="btn btn-ghost btn-sm">Edit</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Quick tips -->
+  <div class="card">
+    <div class="card-hdr">Quick Actions</div>
+    <div style="padding:16px 20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+      <div style="background:#1A1010;border:1px solid #2A1515;border-radius:10px;padding:16px;text-align:center;cursor:pointer;">
+        <div style="font-size:24px;margin-bottom:8px;">🎨</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px;">Design in Canva</div>
+        <div style="font-size:11px;color:#7A5555;">Open Canva to create or update your menu design</div>
+      </div>
+      <div style="background:#1A1010;border:1px solid #2A1515;border-radius:10px;padding:16px;text-align:center;cursor:pointer;">
+        <div style="font-size:24px;margin-bottom:8px;">📅</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px;">Schedule Holiday Promo</div>
+        <div style="font-size:11px;color:#7A5555;">Set up your next seasonal menu override</div>
+      </div>
+      <div style="background:#1A1010;border:1px solid rgba(255,68,68,0.2);border-radius:10px;padding:16px;text-align:center;cursor:pointer;">
+        <div style="font-size:24px;margin-bottom:8px;">📱</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px;">Download QR Codes</div>
+        <div style="font-size:11px;color:#7A5555;">Print-ready QR codes for all your menus</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</body>
+</html>

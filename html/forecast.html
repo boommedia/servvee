@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Servvee — 12-Month Revenue Forecast</title>
+<style>
+  :root {
+    --red: #FF4444; --red-hover: #FF6B6B; --red-dim: #CC3333;
+    --bg: #090606; --surface: #150D0D; --surface2: #1A1010;
+    --border: #2A1515; --border2: #3A1F1F;
+    --text: #F0E0E0; --muted: #7A5555; --muted2: #9A6666;
+    --success: #4ADE80; --warn: #FBBF24; --info: #60A5FA;
+    --starter: #A78BFA; --pro: #FF4444; --agency: #FBBF24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; font-size: 13px; min-height: 100vh; }
+
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo span { color: var(--red); }
+  .header-meta { color: var(--muted); font-size: 11px; }
+  .header-meta strong { color: var(--text); }
+
+  .wrapper { max-width: 1160px; margin: 0 auto; padding: 28px 24px; }
+
+  .page-title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .page-sub { color: var(--muted2); font-size: 12px; margin-bottom: 28px; }
+
+  /* Assumptions panel */
+  .assumptions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .assumption-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .assumption-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 8px; }
+  .assumption-val { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1; }
+  .assumption-sub { font-size: 11px; color: var(--muted2); margin-top: 4px; }
+  .assumption-card.accent { border-color: var(--red); background: rgba(255,68,68,0.05); }
+  .assumption-card.accent .assumption-val { color: var(--red); }
+
+  /* Tier assumptions */
+  .tier-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+  .tier-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .tier-card.starter { border-top: 3px solid var(--starter); }
+  .tier-card.pro { border-top: 3px solid var(--pro); }
+  .tier-card.agency { border-top: 3px solid var(--agency); }
+  .tier-name { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
+  .tier-card.starter .tier-name { color: var(--starter); }
+  .tier-card.pro .tier-name { color: var(--pro); }
+  .tier-card.agency .tier-name { color: var(--agency); }
+  .tier-price { font-size: 28px; font-weight: 800; line-height: 1; }
+  .tier-price span { font-size: 14px; font-weight: 400; color: var(--muted); }
+  .tier-row { display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 11px; }
+  .tier-row label { color: var(--muted); }
+  .tier-row value { font-weight: 600; }
+  .churn-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 2px 7px; border-radius: 4px; background: rgba(251,191,36,0.12); color: var(--warn); border: 1px solid rgba(251,191,36,0.2); margin-top: 8px; }
+
+  /* Main forecast table */
+  .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 12px; }
+  .forecast-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 28px; }
+  .forecast-table { width: 100%; border-collapse: collapse; }
+  .forecast-table thead { background: var(--surface2); }
+  .forecast-table th { padding: 10px 12px; text-align: right; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); white-space: nowrap; }
+  .forecast-table th:first-child { text-align: left; }
+  .forecast-table td { padding: 9px 12px; text-align: right; border-top: 1px solid var(--border); font-size: 12px; }
+  .forecast-table td:first-child { text-align: left; font-weight: 600; color: var(--muted2); }
+  .forecast-table tr:hover td { background: rgba(255,68,68,0.03); }
+  .forecast-table .total-row td { background: rgba(255,68,68,0.05); border-top: 2px solid var(--border2); font-weight: 700; font-size: 13px; color: var(--text); }
+  .forecast-table .total-row td:first-child { color: var(--red); }
+  .mrr-val { color: var(--success); font-weight: 700; }
+  .arr-val { color: var(--warn); font-weight: 700; }
+  .starter-val { color: var(--starter); }
+  .pro-val { color: var(--red); }
+  .agency-val { color: var(--agency); }
+
+  /* Waterfall chart visual */
+  .chart-section { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 28px; }
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .chart-title { font-size: 13px; font-weight: 700; margin-bottom: 16px; }
+
+  /* Bar chart */
+  .bar-chart { display: flex; flex-direction: column; gap: 8px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; }
+  .bar-month { font-size: 10px; color: var(--muted); width: 28px; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 20px; background: var(--surface2); border-radius: 4px; overflow: hidden; position: relative; }
+  .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 6px; font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.9); transition: width 0.3s; }
+  .bar-fill.starter-seg { background: var(--starter); }
+  .bar-fill.pro-seg { background: var(--red); }
+  .bar-fill.agency-seg { background: var(--agency); }
+  .bar-stacked { display: flex; height: 20px; border-radius: 4px; overflow: hidden; }
+  .bar-mrr { font-size: 10px; color: var(--muted2); width: 62px; text-align: right; flex-shrink: 0; }
+
+  /* Milestones */
+  .milestones { display: flex; flex-direction: column; gap: 10px; }
+  .milestone { display: flex; align-items: flex-start; gap: 10px; padding: 12px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); }
+  .milestone-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+  .milestone-dot.red { background: var(--red); }
+  .milestone-dot.green { background: var(--success); }
+  .milestone-dot.yellow { background: var(--warn); }
+  .milestone-dot.purple { background: var(--starter); }
+  .milestone-body { }
+  .milestone-month { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); }
+  .milestone-text { font-size: 11px; color: var(--text); margin-top: 2px; }
+  .milestone-val { font-size: 12px; font-weight: 800; color: var(--red); }
+
+  /* Summary stats */
+  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; text-align: center; }
+  .summary-card .val { font-size: 26px; font-weight: 800; line-height: 1; }
+  .summary-card .lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-top: 6px; }
+  .summary-card .trend { font-size: 10px; color: var(--success); margin-top: 4px; }
+
+  /* Growth scenarios */
+  .scenarios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .scenario { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .scenario.conservative { border-left: 3px solid var(--muted2); }
+  .scenario.moderate { border-left: 3px solid var(--warn); }
+  .scenario.aggressive { border-left: 3px solid var(--success); }
+  .scenario-name { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 8px; }
+  .scenario.conservative .scenario-name { color: var(--muted2); }
+  .scenario.moderate .scenario-name { color: var(--warn); }
+  .scenario.aggressive .scenario-name { color: var(--success); }
+  .scenario-mrr { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .scenario-assumption { font-size: 10px; color: var(--muted); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Serv<span>vee</span></div>
+  <div class="header-meta">12-Month Revenue Forecast &nbsp;·&nbsp; <strong>Base Case</strong> &nbsp;·&nbsp; Updated May 2026</div>
+</div>
+
+<div class="wrapper">
+  <div class="page-title">12-Month MRR Forecast</div>
+  <div class="page-sub">Projected growth across Starter · Pro · Agency tiers — base case assumes consistent paid marketing + organic SEO from month 3</div>
+
+  <!-- Key assumptions -->
+  <div class="section-label">Growth Assumptions</div>
+  <div class="assumptions">
+    <div class="assumption-card accent">
+      <div class="assumption-label">Month 1 Launch MRR</div>
+      <div class="assumption-val">$580</div>
+      <div class="assumption-sub">20 Starter · 0 Pro · 0 Agency</div>
+    </div>
+    <div class="assumption-card">
+      <div class="assumption-label">MoM Growth Rate</div>
+      <div class="assumption-val">32%</div>
+      <div class="assumption-sub">Decelerates to 18% by M12</div>
+    </div>
+    <div class="assumption-card">
+      <div class="assumption-label">Avg Monthly Churn</div>
+      <div class="assumption-val">3.5%</div>
+      <div class="assumption-sub">Net after reactivations</div>
+    </div>
+    <div class="assumption-card">
+      <div class="assumption-label">Upgrade Rate (Starter→Pro)</div>
+      <div class="assumption-val">12%</div>
+      <div class="assumption-sub">Triggered at slot limit</div>
+    </div>
+  </div>
+
+  <!-- Tier cards -->
+  <div class="section-label">Pricing Tiers</div>
+  <div class="tier-grid">
+    <div class="tier-card starter">
+      <div class="tier-name">Starter</div>
+      <div class="tier-price">$29<span>/mo</span></div>
+      <div class="tier-row"><label>Target segments</label><value>Solo restaurant owners</value></div>
+      <div class="tier-row"><label>Slots included</label><value>2 menu slots</value></div>
+      <div class="tier-row"><label>Avg LTV (14 mo)</label><value>$406</value></div>
+      <div class="churn-badge">↑ Highest volume</div>
+    </div>
+    <div class="tier-card pro">
+      <div class="tier-name">Pro</div>
+      <div class="tier-price">$79<span>/mo</span></div>
+      <div class="tier-row"><label>Target segments</label><value>Multi-location owners</value></div>
+      <div class="tier-row"><label>Slots included</label><value>6 menu slots</value></div>
+      <div class="tier-row"><label>Avg LTV (18 mo)</label><value>$1,422</value></div>
+      <div class="churn-badge">★ Highest LTV ratio</div>
+    </div>
+    <div class="tier-card agency">
+      <div class="tier-name">Agency</div>
+      <div class="tier-price">$199<span>/mo</span></div>
+      <div class="tier-row"><label>Target segments</label><value>Digital agencies</value></div>
+      <div class="tier-row"><label>Slots included</label><value>Unlimited + white-label</value></div>
+      <div class="tier-row"><label>Avg LTV (24 mo)</label><value>$4,776</value></div>
+      <div class="churn-badge">↓ Lowest churn</div>
+    </div>
+  </div>
+
+  <!-- Forecast table -->
+  <div class="section-label">Monthly Breakdown</div>
+  <div class="forecast-table-wrap">
+    <table class="forecast-table">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>Starter</th>
+          <th>Pro</th>
+          <th>Agency</th>
+          <th>Total Users</th>
+          <th>New MRR</th>
+          <th>Churn MRR</th>
+          <th>Net MRR</th>
+          <th>Cum. ARR</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Jan 2026</td><td class="starter-val">20</td><td class="pro-val">0</td><td class="agency-val">0</td><td>20</td><td class="mrr-val">+$580</td><td style="color:var(--red)">−$0</td><td class="mrr-val">$580</td><td class="arr-val">$6,960</td></tr>
+        <tr><td>Feb 2026</td><td class="starter-val">38</td><td class="pro-val">4</td><td class="agency-val">0</td><td>42</td><td class="mrr-val">+$858</td><td style="color:var(--red)">−$20</td><td class="mrr-val">$1,418</td><td class="arr-val">$17,016</td></tr>
+        <tr><td>Mar 2026</td><td class="starter-val">56</td><td class="pro-val">9</td><td class="agency-val">1</td><td>66</td><td class="mrr-val">+$1,172</td><td style="color:var(--red)">−$50</td><td class="mrr-val">$2,540</td><td class="arr-val">$30,480</td></tr>
+        <tr><td>Apr 2026</td><td class="starter-val">78</td><td class="pro-val">14</td><td class="agency-val">2</td><td>94</td><td class="mrr-val">+$1,561</td><td style="color:var(--red)">−$89</td><td class="mrr-val">$4,012</td><td class="arr-val">$48,144</td></tr>
+        <tr><td>May 2026</td><td class="starter-val">104</td><td class="pro-val">21</td><td class="agency-val">3</td><td>128</td><td class="mrr-val">+$1,977</td><td style="color:var(--red)">−$140</td><td class="mrr-val">$5,849</td><td class="arr-val">$70,188</td></tr>
+        <tr><td>Jun 2026</td><td class="starter-val">135</td><td class="pro-val">29</td><td class="agency-val">5</td><td>169</td><td class="mrr-val">+$2,479</td><td style="color:var(--red)">−$205</td><td class="mrr-val">$8,123</td><td class="arr-val">$97,476</td></tr>
+        <tr><td>Jul 2026</td><td class="starter-val">170</td><td class="pro-val">38</td><td class="agency-val">7</td><td>215</td><td class="mrr-val">+$2,902</td><td style="color:var(--red)">−$284</td><td class="mrr-val">$10,741</td><td class="arr-val">$128,892</td></tr>
+        <tr><td>Aug 2026</td><td class="starter-val">208</td><td class="pro-val">49</td><td class="agency-val">10</td><td>267</td><td class="mrr-val">+$3,398</td><td style="color:var(--red)">−$376</td><td class="mrr-val">$13,763</td><td class="arr-val">$165,156</td></tr>
+        <tr><td>Sep 2026</td><td class="starter-val">248</td><td class="pro-val">61</td><td class="agency-val">13</td><td>322</td><td class="mrr-val">+$3,782</td><td style="color:var(--red)">−$482</td><td class="mrr-val">$17,063</td><td class="arr-val">$204,756</td></tr>
+        <tr><td>Oct 2026</td><td class="starter-val">289</td><td class="pro-val">74</td><td class="agency-val">17</td><td>380</td><td class="mrr-val">+$4,138</td><td style="color:var(--red)">−$597</td><td class="mrr-val">$20,604</td><td class="arr-val">$247,248</td></tr>
+        <tr><td>Nov 2026</td><td class="starter-val">329</td><td class="pro-val">88</td><td class="agency-val">21</td><td>438</td><td class="mrr-val">+$4,342</td><td style="color:var(--red)">−$721</td><td class="mrr-val">$24,225</td><td class="arr-val">$290,700</td></tr>
+        <tr class="total-row"><td>Dec 2026</td><td class="starter-val">368</td><td class="pro-val">103</td><td class="agency-val">26</td><td>497</td><td class="mrr-val">+$4,602</td><td style="color:var(--red)">−$848</td><td class="mrr-val">$27,979</td><td class="arr-val">$335,748</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Chart + Milestones -->
+  <div class="chart-section">
+    <div class="chart-card">
+      <div class="chart-title">MRR by Tier — Stacked Growth</div>
+      <div class="bar-chart">
+        <div class="bar-row">
+          <div class="bar-month">Jan</div>
+          <div class="bar-track">
+            <div class="bar-stacked">
+              <div class="bar-fill starter-seg" style="width:100%"></div>
+            </div>
+          </div>
+          <div class="bar-mrr" style="color:var(--muted2)">$580</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-month">Feb</div>
+          <div class="bar-track">
+            <div class="bar-stacked">
+              <div class="bar-fill starter-seg" style="width:77%"></div>
+              <div class="bar-fill pro-seg" style="width:23%"></div>
+            </div>
+          </div>
+          <div class="bar-mrr" style="color:var(--muted2)">$1,418</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-month">Mar</div>
+          <div class="bar-track">
+            <div class="bar-stacked">
+              <div class="bar-fill starter-seg" style="width:64%"></div>
+              <div class="bar-fill pro-seg" style="width:28%"></div>
+              <div class="bar-fill agency-seg" style="width:8%"></div>
+            </div>
+          </div>
+          <div class="bar-mrr" style="color:var(--muted2)">$2,540</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-month">Apr</div>
+          <div class="bar-track">
+            <div class="bar-stacked">
+              <div class="bar-fill starter-seg" style="width:56%"></div>
+              <div class="bar-fill pro-seg" style="width:28%"></div>
+              <div class="bar-fill agency-seg" style="width:16%"></div>
+            </div>
+          </div>
+          <div class="bar-mrr" style="color:var(--muted2)">$4,012</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-month">May</div>
+          <div class="bar-track">
+            <div class="bar-stacked">
+              <div class="bar-fill starter-seg" style="width:52%"></div>
+              <div class="bar-fill pro-seg" style="width:28%"></div>
+              <div class="bar-fill agency-seg" style="width:20%"></div>
+            </div>
+          </div>
+          <div class="bar-mrr" style="color:var(--muted2)">$5,849</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-month">Jun</div>
+          <div class="bar-track">
+            <div class="bar-stacked">
+              <div class="bar-fill starter-seg" style="width:48%"></div>
+              <div class="bar-fill pro-seg" style="width:28%"></div>
+              <div class="bar-fill agency-seg" style="width:24%"></div>
+            </div>
+          </div>
+          <div class="bar-mrr" style="color:var(--muted2)">$8,123</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-month">Jul</div>
+          <div class="bar-track">
+            <div class="bar-stacked">
+              <div class="bar-fill starter-seg" style="width:46%"></div>
+              <div class="bar-fill pro-seg" style="width:28%"></div>
+              <div class="bar-fill agency-seg" style="width:26%"></div>
+            </div>
+          </div>
+          <div class="bar-mrr" style="color:var(--muted2)">$10,741</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-month">Aug</div>
+          <div class="bar-track">
+            <div class="bar-stacked">
+              <div class="bar-fill starter-seg" style="width:44%"></div>
+              <div class="bar-fill pro-seg" style="width:28%"></div>
+              <div class="bar-fill agency-seg" style="width:28%"></div>
+            </div>
+          </div>
+          <div class="bar-mrr" style="color:var(--muted2)">$13,763</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-month">Sep</div>
+          <div class="bar-track">
+            <div class="bar-stacked">
+              <div class="bar-fill starter-seg" style="width:42%"></div>
+              <div class="bar-fill pro-seg" style="width:28%"></div>
+              <div class="bar-fill agency-seg" style="width:30%"></div>
+            </div>
+          </div>
+          <div class="bar-mrr" style="color:var(--muted2)">$17,063</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-month">Oct</div>
+          <div class="bar-track">
+            <div class="bar-stacked">
+              <div class="bar-fill starter-seg" style="width:40%"></div>
+              <div class="bar-fill pro-seg" style="width:29%"></div>
+              <div class="bar-fill agency-seg" style="width:31%"></div>
+            </div>
+          </div>
+          <div class="bar-mrr" style="color:var(--muted2)">$20,604</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-month">Nov</div>
+          <div class="bar-track">
+            <div class="bar-stacked">
+              <div class="bar-fill starter-seg" style="width:39%"></div>
+              <div class="bar-fill pro-seg" style="width:29%"></div>
+              <div class="bar-fill agency-seg" style="width:32%"></div>
+            </div>
+          </div>
+          <div class="bar-mrr" style="color:var(--muted2)">$24,225</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-month">Dec</div>
+          <div class="bar-track">
+            <div class="bar-stacked">
+              <div class="bar-fill starter-seg" style="width:38%"></div>
+              <div class="bar-fill pro-seg" style="width:30%"></div>
+              <div class="bar-fill agency-seg" style="width:32%"></div>
+            </div>
+          </div>
+          <div class="bar-mrr" style="font-weight:700; color:var(--success)">$27,979</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:16px; margin-top:14px; padding-top:12px; border-top:1px solid var(--border);">
+        <span style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)"><span style="width:10px;height:10px;border-radius:2px;background:var(--starter);display:inline-block;"></span>Starter</span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)"><span style="width:10px;height:10px;border-radius:2px;background:var(--red);display:inline-block;"></span>Pro</span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)"><span style="width:10px;height:10px;border-radius:2px;background:var(--agency);display:inline-block;"></span>Agency</span>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Key Milestones</div>
+      <div class="milestones">
+        <div class="milestone">
+          <div class="milestone-dot red"></div>
+          <div class="milestone-body">
+            <div class="milestone-month">Month 1 — Jan 2026</div>
+            <div class="milestone-text">Launch & first 20 Starters</div>
+            <div class="milestone-val">$580 MRR</div>
+          </div>
+        </div>
+        <div class="milestone">
+          <div class="milestone-dot purple"></div>
+          <div class="milestone-body">
+            <div class="milestone-month">Month 3 — Mar 2026</div>
+            <div class="milestone-text">First Pro upgrades; SEO content live</div>
+            <div class="milestone-val">$2,540 MRR</div>
+          </div>
+        </div>
+        <div class="milestone">
+          <div class="milestone-dot yellow"></div>
+          <div class="milestone-body">
+            <div class="milestone-month">Month 5 — May 2026</div>
+            <div class="milestone-text">First Agency accounts; referral program</div>
+            <div class="milestone-val">$5,849 MRR</div>
+          </div>
+        </div>
+        <div class="milestone">
+          <div class="milestone-dot green"></div>
+          <div class="milestone-body">
+            <div class="milestone-month">Month 8 — Aug 2026</div>
+            <div class="milestone-text">Ramen profitability threshold</div>
+            <div class="milestone-val">$13,763 MRR</div>
+          </div>
+        </div>
+        <div class="milestone">
+          <div class="milestone-dot green"></div>
+          <div class="milestone-body">
+            <div class="milestone-month">Month 12 — Dec 2026</div>
+            <div class="milestone-text">497 total users · 26 Agency accounts</div>
+            <div class="milestone-val">$27,979 MRR</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- End-of-year summary -->
+  <div class="section-label">Year-End Summary</div>
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="val" style="color:var(--success)">$27,979</div>
+      <div class="lbl">December MRR</div>
+      <div class="trend">▲ 4,721% vs Jan</div>
+    </div>
+    <div class="summary-card">
+      <div class="val" style="color:var(--warn)">$335,748</div>
+      <div class="lbl">Cumulative ARR Run-Rate</div>
+      <div class="trend">▲ Base-case target</div>
+    </div>
+    <div class="summary-card">
+      <div class="val" style="color:var(--text)">497</div>
+      <div class="lbl">Total Paying Customers</div>
+      <div class="trend">368 Starter · 103 Pro · 26 Agency</div>
+    </div>
+    <div class="summary-card">
+      <div class="val" style="color:var(--starter)">$56.29</div>
+      <div class="lbl">Blended ARPU (Dec)</div>
+      <div class="trend">▲ Tier mix improving</div>
+    </div>
+  </div>
+
+  <!-- Growth scenarios -->
+  <div class="section-label">Alternative Scenarios — Dec 2026 MRR</div>
+  <div class="scenarios">
+    <div class="scenario conservative">
+      <div class="scenario-name">Conservative</div>
+      <div class="scenario-mrr" style="color:var(--muted2)">$14,200</div>
+      <div class="scenario-assumption">20% MoM growth → 15%<br>4.5% monthly churn<br>Limited paid acquisition<br>~260 total users</div>
+    </div>
+    <div class="scenario moderate">
+      <div class="scenario-name">Base Case (This Plan)</div>
+      <div class="scenario-mrr" style="color:var(--warn)">$27,979</div>
+      <div class="scenario-assumption">32% MoM growth → 18%<br>3.5% monthly churn<br>$2K/mo paid + SEO<br>~497 total users</div>
+    </div>
+    <div class="scenario aggressive">
+      <div class="scenario-name">Aggressive</div>
+      <div class="scenario-mrr" style="color:var(--success)">$52,400</div>
+      <div class="scenario-assumption">40% MoM growth → 22%<br>2.5% monthly churn<br>$5K/mo paid + influencer<br>~870 total users</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

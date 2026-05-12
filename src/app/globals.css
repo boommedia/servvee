@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+/* ── BOOM B.A.A.R.S — Servvee theme ── */
+@theme {
+  --color-sv-accent:        #BB6BD9;
+  --color-sv-accent-2:      #E040FB;
+  --color-sv-success:       #4ADE80;
+  --color-sv-warning:       #FBBF24;
+  --color-sv-danger:        #F87171;
+  --color-sv-bg:            #0D0D12;
+  --color-sv-surface:       #16161E;
+  --color-sv-surface-2:     #1E1E28;
+  --color-sv-surface-3:     #252530;
+  --color-sv-border:        #2A2A38;
+  --color-sv-text:          #EEEEEE;
+  --color-sv-muted:         #888899;
+}
+
+:root {
+  --sv-accent:        #BB6BD9;
+  --sv-accent-2:      #E040FB;
+  --sv-accent-glow:   rgba(187,107,217,0.15);
+  --sv-accent-border: rgba(187,107,217,0.30);
+  --sv-success:       #4ADE80;
+  --sv-warning:       #FBBF24;
+  --sv-danger:        #F87171;
+  --sv-bg:            #0D0D12;
+  --sv-surface:       #16161E;
+  --sv-surface-2:     #1E1E28;
+  --sv-surface-3:     #252530;
+  --sv-border:        #2A2A38;
+  --sv-text:          #EEEEEE;
+  --sv-muted:         #888899;
+  --sv-radius:        14px;
+  --sv-radius-sm:     9px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--sv-bg);
+  color: var(--sv-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+}
+
+/* ── Utility classes used across app ── */
+.card {
+  background: var(--sv-surface);
+  border: 1px solid var(--sv-border);
+  border-radius: var(--sv-radius);
+}
+
+.card-header {
+  padding: 13px 20px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sv-muted);
+  background: var(--sv-surface-2);
+  border-bottom: 1px solid var(--sv-border);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: var(--sv-radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.15s, background 0.15s, border-color 0.15s;
+  line-height: 1;
+}
+
+.btn-primary {
+  background: var(--sv-accent);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(187,107,217,0.35);
+}
+.btn-primary:hover { background: var(--sv-accent-2); }
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--sv-border);
+  color: var(--sv-muted);
+}
+.btn-ghost:hover { border-color: var(--sv-accent-border); color: var(--sv-accent); }
+
+.btn-danger {
+  background: transparent;
+  border-color: rgba(248,113,113,0.3);
+  color: var(--sv-danger);
+}
+.btn-danger:hover { background: rgba(248,113,113,0.1); }
+
+.btn-sm { padding: 5px 11px; font-size: 11px; }
+
+.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sv-muted);
+  margin-bottom: 6px;
+}
+
+.field-input {
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--sv-surface-2);
+  border: 1px solid var(--sv-border);
+  border-radius: var(--sv-radius-sm);
+  color: var(--sv-text);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field-input:focus {
+  border-color: var(--sv-accent);
+  box-shadow: 0 0 0 3px var(--sv-accent-glow);
+}
+.field-input::placeholder { color: var(--sv-muted); }
+
+.field-hint {
+  font-size: 11px;
+  color: var(--sv-muted);
+  margin-top: 5px;
+  opacity: 0.8;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.toast-enter { animation: toast-in 0.2s ease forwards; }
