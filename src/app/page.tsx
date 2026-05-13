@@ -77,29 +77,30 @@ export default async function HomePage() {
           color: 'var(--sv-accent)', marginBottom: 28, letterSpacing: '0.06em',
           textTransform: 'uppercase',
         }}>
-          🍽 Restaurant Menu Manager
+          🎨 Create · Edit · Publish — All in One Place
         </div>
 
         <h1 style={{
           fontSize: 'clamp(36px, 6vw, 68px)', fontWeight: 900,
-          letterSpacing: '-0.03em', lineHeight: 1.08, marginBottom: 24, maxWidth: 820, margin: '0 auto 24px',
+          letterSpacing: '-0.03em', lineHeight: 1.08, marginBottom: 24, maxWidth: 860, margin: '0 auto 24px',
         }}>
-          Your Canva menu,{' '}
+          Create menus &amp; promos with{' '}
           <span style={{
             background: 'linear-gradient(135deg, var(--sv-accent) 0%, var(--sv-accent-2) 100%)',
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
           }}>
-            live on your website
+            Canva or Adobe Express
           </span>
-          {' '}— always up to date
+          {' '}— without leaving Servvee
         </h1>
 
         <p style={{
-          fontSize: 19, color: 'var(--sv-muted)', maxWidth: 560, margin: '0 auto 40px',
+          fontSize: 19, color: 'var(--sv-muted)', maxWidth: 600, margin: '0 auto 40px',
           lineHeight: 1.65, fontWeight: 400,
         }}>
-          Design in Canva or Adobe Express. Paste the URL. Servvee embeds it on
-          your site and auto-switches holiday menus on the dates you set. No code. No webmaster.
+          Design, edit and publish your restaurant menus and holiday promotions using
+          the full Canva or Adobe Express editor — built right into Servvee.
+          Your website updates the moment you hit publish.
         </p>
 
         <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -159,7 +160,7 @@ export default async function HomePage() {
             }}>
               <div style={{ fontSize: 44 }}>🍝</div>
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--sv-accent)' }}>Tonight&apos;s Specials</div>
-              <div style={{ fontSize: 10, color: 'var(--sv-muted)' }}>Designed in Canva · Auto-updated</div>
+              <div style={{ fontSize: 10, color: 'var(--sv-muted)' }}>Designed in Canva · Live on your site</div>
             </div>
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
@@ -208,13 +209,13 @@ export default async function HomePage() {
                 The Servvee way ✓
               </div>
               <h2 style={{ fontSize: 28, fontWeight: 900, lineHeight: 1.2, marginBottom: 20 }}>
-                Publish in Canva. Website updates in seconds.
+                Design, publish, go live — all inside Servvee.
               </h2>
               {[
-                'Design in Canva like you already do',
-                'Paste the URL into Servvee once',
-                'Hit Publish in Canva — site updates instantly',
-                'Schedule holiday menus to auto-switch on set dates',
+                'Launch the full Canva or Adobe Express editor inside Servvee',
+                'Create and edit menus and promos without switching apps',
+                'Hit Publish — your website updates in seconds',
+                'Schedule holiday promos to auto-switch on set dates',
                 'Revert automatically when the holiday ends',
               ].map((item, i) => (
                 <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 10, fontSize: 14 }}>
@@ -248,20 +249,20 @@ export default async function HomePage() {
               {
                 step: '01',
                 icon: '🎨',
-                title: 'Design in Canva',
-                desc: 'Create or update your menu design in Canva or Adobe Express. Use their templates — you probably already do.',
+                title: 'Create inside Servvee',
+                desc: 'Launch the full Canva or Adobe Express editor without leaving Servvee. Design your menu or promo, hit Publish — done.',
               },
               {
                 step: '02',
-                icon: '🔗',
-                title: 'Paste the URL',
-                desc: 'Copy your Canva share link and paste it into Servvee. We auto-detect the design and generate your embed snippet.',
+                icon: '⚡',
+                title: 'Go live instantly',
+                desc: 'Your design is auto-linked to your embed. No copying URLs. Your website updates the moment you publish.',
               },
               {
                 step: '03',
-                icon: '🚀',
-                title: 'Add iframe to your site',
-                desc: 'One `<iframe>` tag on your website. Works on WordPress, Squarespace, Wix, Webflow — any platform.',
+                icon: '🗓',
+                title: 'Schedule & forget',
+                desc: 'Set holiday promos to go live on a specific date and revert automatically. Works on WordPress, Wix, Webflow — anywhere.',
               },
             ].map(({ step, icon, title, desc }) => (
               <div key={step} style={{
@@ -297,40 +298,40 @@ export default async function HomePage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
             {[
               {
-                icon: <RefreshCw size={20} />,
+                icon: <Zap size={20} />,
                 color: 'var(--sv-accent)',
-                title: 'Instant live embeds',
-                desc: 'Publish in Canva and your website updates automatically. Zero manual steps, zero waiting on a developer.',
+                title: 'Built-in design studio',
+                desc: 'Create and edit menus and promos using the full Canva or Adobe Express editor — without ever leaving Servvee.',
               },
               {
                 icon: <Calendar size={20} />,
                 color: 'var(--sv-warning)',
-                title: 'Holiday scheduling',
-                desc: "Set Mother's Day, Valentine's, Christmas menus to go live and revert automatically. Set it once, forget it.",
+                title: 'Holiday promo scheduling',
+                desc: "Set Mother's Day, Valentine's, Christmas promos to go live and revert automatically. Design them in Canva, schedule in Servvee.",
               },
               {
-                icon: <Globe size={20} />,
+                icon: <RefreshCw size={20} />,
                 color: 'var(--sv-success)',
-                title: 'Works on any website',
-                desc: 'One iframe tag works on WordPress, Squarespace, Wix, Webflow, or raw HTML. No plugin, no CMS access needed.',
+                title: 'Instant live embeds',
+                desc: 'Publish in Canva or Adobe Express and your website updates in seconds. Zero manual steps, zero developer wait.',
               },
               {
                 icon: <QrCode size={20} />,
                 color: '#60A5FA',
                 title: 'Auto QR codes',
-                desc: 'Every menu slot gets a QR code automatically generated. Print it on table cards and let guests scan to view the menu.',
+                desc: 'Every menu slot gets a QR code automatically. Print it on table cards and let guests scan to view the live menu.',
               },
               {
-                icon: <Zap size={20} />,
+                icon: <Globe size={20} />,
                 color: '#F472B6',
-                title: 'Multiple menu slots',
-                desc: "Run a separate slot for your bar menu, kids menu, brunch menu — each on its own URL. Upgrade to Pro for more slots.",
+                title: 'Works on any website',
+                desc: 'One iframe tag works on WordPress, Squarespace, Wix, Webflow, or raw HTML. No plugin, no CMS access needed.',
               },
               {
                 icon: <Clock size={20} />,
                 color: 'var(--sv-accent-2)',
                 title: 'Save 16 hours/month',
-                desc: 'Restaurant owners report saving 16+ hours per month previously spent emailing webmasters and waiting for updates.',
+                desc: 'Restaurant owners report saving 16+ hours per month previously spent designing, exporting, emailing and waiting for updates.',
               },
             ].map(({ icon, color, title, desc }) => (
               <div key={title} style={{
@@ -434,8 +435,8 @@ export default async function HomePage() {
                 desc: 'Perfect for a single restaurant location.',
                 features: [
                   '2 menu slots',
-                  'Canva + Adobe Express embeds',
-                  'Holiday scheduling',
+                  'Canva + Adobe Express design studio',
+                  'Holiday promo scheduling',
                   'QR code generation',
                   'iframe embed snippet',
                   'Email support',
@@ -524,21 +525,33 @@ export default async function HomePage() {
       }}>
         <div style={{ maxWidth: 600, margin: '0 auto' }}>
           <h2 style={{ fontSize: 38, fontWeight: 900, letterSpacing: '-0.03em', marginBottom: 16 }}>
-            Your menu, always{' '}
+            Design, publish, go live —{' '}
             <span style={{
               background: 'linear-gradient(135deg, var(--sv-accent), var(--sv-accent-2))',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            }}>fresh</span>
+            }}>today</span>
           </h2>
-          <p style={{ fontSize: 16, color: 'var(--sv-muted)', marginBottom: 36, lineHeight: 1.65 }}>
-            Join restaurants that stopped waiting on developers and started publishing
-            their own menus in seconds.
+          <p style={{ fontSize: 16, color: 'var(--sv-muted)', marginBottom: 20, lineHeight: 1.65 }}>
+            Create and manage your restaurant menus and holiday promos with Canva or Adobe Express —
+            all inside Servvee. No switching apps. No waiting on developers.
           </p>
+          {/* Tool logos */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 32 }}>
+            {[
+              { label: '🎨 Canva', color: 'rgba(0,196,204,0.15)', border: 'rgba(0,196,204,0.3)', text: '#00C4CC' },
+              { label: '✦ Adobe Express', color: 'rgba(255,107,107,0.12)', border: 'rgba(255,107,107,0.3)', text: '#FF6B6B' },
+            ].map(t => (
+              <span key={t.label} style={{
+                fontSize: 13, fontWeight: 700, padding: '6px 16px', borderRadius: 20,
+                background: t.color, border: `1px solid ${t.border}`, color: t.text,
+              }}>{t.label}</span>
+            ))}
+          </div>
           <Link href="/signup" className="btn btn-primary" style={{
             padding: '15px 40px', fontSize: 17,
             boxShadow: '0 8px 40px rgba(187,107,217,0.5)',
           }}>
-            Start your free trial <ChevronRight size={17} />
+            Start creating for free <ChevronRight size={17} />
           </Link>
           <p style={{ marginTop: 16, fontSize: 12, color: 'var(--sv-muted)' }}>
             14 days free · No credit card · Cancel anytime
