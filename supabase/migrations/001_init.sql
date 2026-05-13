@@ -48,29 +48,33 @@ RETURNS TABLE (
     source      TEXT,
     design_id   TEXT
 ) LANGUAGE sql SECURITY DEFINER AS $$
-    -- 1. Holiday override in range
-    SELECT id, name, slot, source, design_id
-    FROM   promos
-    WHERE  user_id   = p_user_id
-      AND  slot      = p_slot
-      AND  is_active = TRUE
-      AND  start_date IS NOT NULL
-      AND  start_date <= CURRENT_DATE
-      AND  end_date   >= CURRENT_DATE
-    ORDER BY start_date DESC
-    LIMIT 1
+    -- 1. Holiday override in range (parentheses required when LIMIT inside UNION ALL)
+    (
+        SELECT id, name, slot, source, design_id
+        FROM   promos
+        WHERE  user_id   = p_user_id
+          AND  slot      = p_slot
+          AND  is_active = TRUE
+          AND  start_date IS NOT NULL
+          AND  start_date <= CURRENT_DATE
+          AND  end_date   >= CURRENT_DATE
+        ORDER BY start_date DESC
+        LIMIT 1
+    )
 
     UNION ALL
 
     -- 2. Standard (no-date) fallback
-    SELECT id, name, slot, source, design_id
-    FROM   promos
-    WHERE  user_id   = p_user_id
-      AND  slot      = p_slot
-      AND  is_active = TRUE
-      AND  start_date IS NULL
-    ORDER BY created_at DESC
-    LIMIT 1
+    (
+        SELECT id, name, slot, source, design_id
+        FROM   promos
+        WHERE  user_id   = p_user_id
+          AND  slot      = p_slot
+          AND  is_active = TRUE
+          AND  start_date IS NULL
+        ORDER BY created_at DESC
+        LIMIT 1
+    )
 
     LIMIT 1;
 $$;
