@@ -9,6 +9,10 @@ VALUES (
 )
 ON CONFLICT (id) DO NOTHING;
 
+DROP POLICY IF EXISTS "Users upload own PDFs" ON storage.objects;
+DROP POLICY IF EXISTS "Public read menu PDFs" ON storage.objects;
+DROP POLICY IF EXISTS "Users delete own PDFs" ON storage.objects;
+
 -- Authenticated users can upload into their own user-id folder
 CREATE POLICY "Users upload own PDFs"
   ON storage.objects FOR INSERT TO authenticated
