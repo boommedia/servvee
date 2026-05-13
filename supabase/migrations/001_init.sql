@@ -29,6 +29,10 @@ CREATE TABLE IF NOT EXISTS promos (
 CREATE INDEX IF NOT EXISTS idx_promos_user_slot ON promos (user_id, slot);
 CREATE INDEX IF NOT EXISTS idx_promos_dates ON promos (start_date, end_date);
 
+-- ── Data API grants (required post-Oct 2026 Supabase policy change) ──────────
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.promos TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.promos TO service_role;
+
 -- ── Row-Level Security ───────────────────────────────────────────────────────
 ALTER TABLE promos ENABLE ROW LEVEL SECURITY;
 
