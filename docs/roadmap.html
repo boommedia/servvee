@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Servvee — Roadmap & Status</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0D0D12; color: #EEEEEE; padding: 40px 24px; line-height: 1.6; }
+  .container { max-width: 960px; margin: 0 auto; }
+
+  /* Header */
+  .header { display: flex; align-items: center; gap: 14px; margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid #2A2A38; }
+  .logo { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg,#BB6BD9,#E040FB); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: #fff; flex-shrink: 0; }
+  .header-text h1 { font-size: 24px; font-weight: 900; letter-spacing: -0.03em; }
+  .header-text p { font-size: 12px; color: #888899; margin-top: 2px; }
+  .badge { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; background: rgba(187,107,217,0.15); border: 1px solid rgba(187,107,217,0.3); color: #BB6BD9; border-radius: 20px; padding: 3px 10px; }
+
+  /* Section */
+  .section { margin-bottom: 40px; }
+  .section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #BB6BD9; margin-bottom: 14px; }
+  h2 { font-size: 18px; font-weight: 800; margin-bottom: 16px; letter-spacing: -0.02em; }
+
+  /* Status table */
+  table { width: 100%; border-collapse: collapse; }
+  th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #555566; padding: 8px 14px; text-align: left; border-bottom: 1px solid #2A2A38; background: #16161E; }
+  td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #1E1E2A; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #16161E; }
+
+  /* Status badges */
+  .status { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+  .done    { background: rgba(74,222,128,0.12);  color: #4ADE80; border: 1px solid rgba(74,222,128,0.3); }
+  .blocked { background: rgba(248,113,113,0.12); color: #F87171; border: 1px solid rgba(248,113,113,0.3); }
+  .soon    { background: rgba(251,191,36,0.12);  color: #FBBF24; border: 1px solid rgba(251,191,36,0.3); }
+  .planned { background: rgba(96,165,250,0.10);  color: #60A5FA; border: 1px solid rgba(96,165,250,0.25); }
+  .partial { background: rgba(187,107,217,0.12); color: #BB6BD9; border: 1px solid rgba(187,107,217,0.3); }
+
+  /* Card grid */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .card { background: #16161E; border: 1px solid #2A2A38; border-radius: 12px; padding: 20px; }
+  .card h3 { font-size: 14px; font-weight: 800; margin-bottom: 6px; }
+  .card p { font-size: 12px; color: #888899; line-height: 1.6; margin-bottom: 10px; }
+  .card .tier { font-size: 10px; font-weight: 700; color: #BB6BD9; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* Pricing */
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .plan { background: #16161E; border: 1px solid #2A2A38; border-radius: 14px; padding: 24px; }
+  .plan.highlight { border-color: #BB6BD9; background: linear-gradient(180deg, rgba(187,107,217,0.07) 0%, #16161E 100%); }
+  .plan-name { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .plan-price { font-size: 36px; font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin-bottom: 4px; }
+  .plan-price span { font-size: 13px; font-weight: 400; color: #888899; }
+  .plan-annual { font-size: 11px; color: #4ADE80; margin-bottom: 16px; }
+  .plan-features { list-style: none; }
+  .plan-features li { font-size: 12px; color: #888899; padding: 5px 0; border-bottom: 1px solid #2A2A38; display: flex; gap: 8px; }
+  .plan-features li:last-child { border-bottom: none; }
+  .check { color: #BB6BD9; font-weight: 900; flex-shrink: 0; }
+
+  /* Timeline */
+  .timeline { list-style: none; }
+  .timeline li { display: flex; gap: 16px; padding: 14px 0; border-bottom: 1px solid #1E1E2A; }
+  .timeline li:last-child { border-bottom: none; }
+  .tl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .tl-label { font-size: 11px; color: #555566; margin-bottom: 2px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+  .tl-title { font-size: 14px; font-weight: 700; }
+  .tl-desc { font-size: 12px; color: #888899; margin-top: 3px; }
+
+  @media (max-width: 640px) {
+    .pricing-grid { grid-template-columns: 1fr; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">S</div>
+    <div class="header-text">
+      <h1>Serv<span style="color:#BB6BD9">vee</span> — Roadmap &amp; Status</h1>
+      <p>Menu &amp; Promo Manager · Part of BOOM B.A.A.R.S · Updated May 2026</p>
+    </div>
+    <span class="badge">Beta</span>
+  </div>
+
+  <!-- Beta Blockers -->
+  <div class="section">
+    <div class="section-title">Beta Launch Blockers</div>
+    <table>
+      <thead>
+        <tr><th>Item</th><th>Status</th><th>Fix Required</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Email confirmation → localhost</td><td><span class="status blocked">❌ Broken</span></td><td>Supabase → Auth → URL Config → set Site URL to https://servvee.online</td></tr>
+        <tr><td>Supabase SMTP (Resend)</td><td><span class="status blocked">❌ Not wired</span></td><td>smtp.resend.com:465, user=resend, pass=RESEND_API_KEY in Supabase Auth settings</td></tr>
+        <tr><td>Canva OAuth credentials</td><td><span class="status blocked">❌ Empty</span></td><td>Add CANVA_CLIENT_ID + CANVA_CLIENT_SECRET to Vercel env vars</td></tr>
+        <tr><td>Adobe allowed origin</td><td><span class="status soon">⚠ Unverified</span></td><td>Add https://servvee.online in Adobe Developer Console project</td></tr>
+        <tr><td>002_canva_tokens.sql migration</td><td><span class="status blocked">❌ Not run</span></td><td>Run in Supabase SQL Editor</td></tr>
+        <tr><td>003_pdf_storage.sql migration</td><td><span class="status blocked">❌ Not run</span></td><td>Run in Supabase SQL Editor</td></tr>
+        <tr><td>Vercel env vars (ADMIN_EMAILS, RESEND_API_KEY)</td><td><span class="status blocked">❌ Missing</span></td><td>Add to Vercel Project → Settings → Environment Variables</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- What's Built -->
+  <div class="section">
+    <div class="section-title">What's Built &amp; Deployed</div>
+    <table>
+      <thead>
+        <tr><th>Feature</th><th>Status</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Auth — signup, login, forgot password, reset password</td><td><span class="status done">✓ Done</span></td><td>Supabase Auth, branded email templates</td></tr>
+        <tr><td>Client dashboard (KPIs, menus, sidebar)</td><td><span class="status done">✓ Done</span></td><td>Live alerts, embed snippet, Canva tips</td></tr>
+        <tr><td>Admin dashboard (platform metrics)</td><td><span class="status done">✓ Done</span></td><td>MRR estimate, user list, promo list, tier breakdown</td></tr>
+        <tr><td>Menu + holiday promo management</td><td><span class="status done">✓ Done</span></td><td>Create, edit, delete, date-range scheduling</td></tr>
+        <tr><td>Embed page with holiday RPC resolver</td><td><span class="status done">✓ Done</span></td><td>/embed/userId/slot — always fresh, holiday priority</td></tr>
+        <tr><td>Adobe Express in-app editor</td><td><span class="status done">✓ Done</span></td><td>Full editor opens in overlay, onPublish auto-fills URL</td></tr>
+        <tr><td>Canva Connect OAuth + design picker</td><td><span class="status partial">⚠ Code done</span></td><td>Needs CANVA_CLIENT_ID + Secret to activate</td></tr>
+        <tr><td>PDF import + edit</td><td><span class="status done">✓ Done</span></td><td>Supabase Storage, Google Docs viewer, Edit in Adobe Express</td></tr>
+        <tr><td>QR code generator</td><td><span class="status done">✓ Done</span></td><td>Per-slot QR, downloadable PNG, points to page_url or embed</td></tr>
+        <tr><td>Branded email system</td><td><span class="status partial">⚠ Partial</span></td><td>Templates built, SMTP config + Resend key needed</td></tr>
+        <tr><td>Remote update API (Make.com / Zapier)</td><td><span class="status done">✓ Done</span></td><td>POST /api/update with X-Servvee-Key auth</td></tr>
+        <tr><td>Public landing page</td><td><span class="status done">✓ Done</span></td><td>Hero, features, pricing, social proof, CTA</td></tr>
+        <tr><td>Stripe payments</td><td><span class="status planned">⬜ Not started</span></td><td>Needed for paid tiers — build after beta</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add-On Services -->
+  <div class="section">
+    <div class="section-title">Add-On Services — Roadmap</div>
+    <div class="grid">
+      <div class="card">
+        <h3>📊 Embed Analytics</h3>
+        <p>Track views per menu slot — how many guests scanned or loaded each menu. Shows restaurants their ROI directly in dashboard.</p>
+        <div class="tier">Pro+ · High priority</div>
+      </div>
+      <div class="card">
+        <h3>📱 Social Auto-Post</h3>
+        <p>When a menu publishes or a holiday promo goes live, auto-post to Instagram and Facebook via Make.com webhook.</p>
+        <div class="tier">Pro+ · Medium priority</div>
+      </div>
+      <div class="card">
+        <h3>💬 SMS Menu Link</h3>
+        <p>Send the menu URL via text message to customers. Integrates with Twilio. Great for table QR fallback.</p>
+        <div class="tier">Pro+ · Medium priority</div>
+      </div>
+      <div class="card">
+        <h3>🌐 White-Label Embed</h3>
+        <p>Custom domain for embed URL (menu.yourrestaurant.com instead of servvee.online/embed/...). Requires DNS config.</p>
+        <div class="tier">Agency · Low priority</div>
+      </div>
+      <div class="card">
+        <h3>👥 Multi-User / Team</h3>
+        <p>Multiple staff logins per restaurant account with role-based access (owner vs. manager vs. designer).</p>
+        <div class="tier">Agency · Medium priority</div>
+      </div>
+      <div class="card">
+        <h3>🌍 Menu Translations</h3>
+        <p>AI auto-translate menu content into Spanish, French, Portuguese etc. Display language based on visitor browser locale.</p>
+        <div class="tier">Add-on · Future</div>
+      </div>
+      <div class="card">
+        <h3>🔔 Outbound Webhooks</h3>
+        <p>Push events (menu published, promo went live, promo ended) to Make.com / Zapier / custom endpoints.</p>
+        <div class="tier">Pro+ · Low priority</div>
+      </div>
+      <div class="card">
+        <h3>🖨 Print-Ready Export</h3>
+        <p>Export the current menu as a print-ready PDF at 300 DPI. Useful for physical menu boards and table cards.</p>
+        <div class="tier">Starter+ · Future</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pricing -->
+  <div class="section">
+    <div class="section-title">Pricing Model — Beta → Launch</div>
+    <div class="pricing-grid" style="margin-bottom:20px;">
+      <div class="plan">
+        <div class="plan-name" style="color:#A78BFA;">Starter</div>
+        <div class="plan-price" style="color:#A78BFA;">$29<span>/mo</span></div>
+        <div class="plan-annual">$290/yr — 2 months free</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> 2 menu slots</li>
+          <li><span class="check">✓</span> Canva + Adobe Express design studio</li>
+          <li><span class="check">✓</span> PDF import &amp; edit</li>
+          <li><span class="check">✓</span> Holiday promo scheduling</li>
+          <li><span class="check">✓</span> QR code generator</li>
+          <li><span class="check">✓</span> iframe embed snippet</li>
+          <li><span class="check">✓</span> Email support</li>
+        </ul>
+      </div>
+      <div class="plan highlight">
+        <div class="plan-name" style="color:#BB6BD9;">Pro <span style="font-size:10px;background:rgba(187,107,217,0.2);border-radius:10px;padding:2px 8px;">Most Popular</span></div>
+        <div class="plan-price" style="color:#BB6BD9;">$79<span>/mo</span></div>
+        <div class="plan-annual">$790/yr — 2 months free</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> 6 menu slots</li>
+          <li><span class="check">✓</span> Everything in Starter</li>
+          <li><span class="check">✓</span> Embed analytics</li>
+          <li><span class="check">✓</span> Make.com / Zapier webhook</li>
+          <li><span class="check">✓</span> Social auto-post</li>
+          <li><span class="check">✓</span> Priority support</li>
+          <li><span class="check">✓</span> Custom slot names</li>
+        </ul>
+      </div>
+      <div class="plan">
+        <div class="plan-name" style="color:#FBBF24;">Agency</div>
+        <div class="plan-price" style="color:#FBBF24;">$199<span>/mo</span></div>
+        <div class="plan-annual">$1,990/yr — 2 months free</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Unlimited menu slots</li>
+          <li><span class="check">✓</span> Everything in Pro</li>
+          <li><span class="check">✓</span> Unlimited clients</li>
+          <li><span class="check">✓</span> White-label embed domain</li>
+          <li><span class="check">✓</span> Multi-user / team access</li>
+          <li><span class="check">✓</span> API access</li>
+          <li><span class="check">✓</span> Dedicated support</li>
+        </ul>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>Stripe Task</th><th>Status</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Create 6 Stripe products (3 tiers × monthly + annual)</td><td><span class="status planned">⬜ Not started</span></td><td>Do in Stripe Dashboard after beta</td></tr>
+        <tr><td>/api/stripe/checkout — create Checkout Session</td><td><span class="status planned">⬜ Not started</span></td><td>Redirects user to Stripe hosted checkout</td></tr>
+        <tr><td>/api/stripe/webhook — subscription events</td><td><span class="status planned">⬜ Not started</span></td><td>Handle customer.subscription.created/updated/deleted</td></tr>
+        <tr><td>subscriptions table in Supabase</td><td><span class="status planned">⬜ Not started</span></td><td>Store stripe_customer_id, tier, status, period_end per user</td></tr>
+        <tr><td>Tier enforcement middleware</td><td><span class="status planned">⬜ Not started</span></td><td>Gate slot count + features by subscription tier</td></tr>
+        <tr><td>/dashboard/billing page</td><td><span class="status planned">⬜ Not started</span></td><td>Show current plan, upgrade/downgrade, invoice history</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Timeline -->
+  <div class="section">
+    <div class="section-title">Launch Timeline</div>
+    <ul class="timeline">
+      <li>
+        <div class="tl-dot" style="background:#F87171;"></div>
+        <div>
+          <div class="tl-label">Week 1 — Now</div>
+          <div class="tl-title">Fix beta blockers</div>
+          <div class="tl-desc">Supabase URL config, Resend SMTP, Canva credentials, SQL migrations, Vercel env vars</div>
+        </div>
+      </li>
+      <li>
+        <div class="tl-dot" style="background:#FBBF24;"></div>
+        <div>
+          <div class="tl-label">Week 2</div>
+          <div class="tl-title">Beta launch — invite first 10 restaurants</div>
+          <div class="tl-desc">Free access, collect feedback, identify power users. Monitor Supabase for errors.</div>
+        </div>
+      </li>
+      <li>
+        <div class="tl-dot" style="background:#BB6BD9;"></div>
+        <div>
+          <div class="tl-label">Week 3–4</div>
+          <div class="tl-title">Build embed analytics + Stripe integration</div>
+          <div class="tl-desc">Analytics shows restaurants their ROI. Stripe enables paid conversions from beta users.</div>
+        </div>
+      </li>
+      <li>
+        <div class="tl-dot" style="background:#60A5FA;"></div>
+        <div>
+          <div class="tl-label">Month 2</div>
+          <div class="tl-title">Public launch + paid tiers live</div>
+          <div class="tl-desc">Landing page CTA → Stripe checkout. Beta users converted or grandfathered.</div>
+        </div>
+      </li>
+      <li>
+        <div class="tl-dot" style="background:#4ADE80;"></div>
+        <div>
+          <div class="tl-label">Month 3+</div>
+          <div class="tl-title">Add-ons: social post, SMS, white-label</div>
+          <div class="tl-desc">Build what beta users ask for most. Expand Agency tier with white-label features.</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <p style="font-size:11px;color:#555566;text-align:center;margin-top:20px;">
+    Servvee · BOOM B.A.A.R.S · © 2026 BOOM Media · servvee.online
+  </p>
+</div>
+</body>
+</html>

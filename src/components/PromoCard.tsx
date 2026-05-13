@@ -2,11 +2,14 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useTransition } from 'react'
-import { ExternalLink, Pencil, Trash2 } from 'lucide-react'
+import { useTransition, useState } from 'react'
+import { ExternalLink, Pencil, Trash2, QrCode } from 'lucide-react'
 import { promoStatus, embedUrl, editUrl } from '@/lib/types'
 import type { Promo, PromoStatus } from '@/lib/types'
 import CopyButton from './CopyButton'
+import dynamic from 'next/dynamic'
+
+const QRModal = dynamic(() => import('./QRModal'), { ssr: false })
 
 const STATUS_STYLES: Record<PromoStatus, { label: string; bg: string; color: string; border: string }> = {
   live:      { label: 'LIVE',      bg: 'rgba(74,222,128,0.12)',  color: '#4ADE80', border: 'rgba(74,222,128,0.3)' },
@@ -22,6 +25,7 @@ interface Props { promo: Promo; userId: string }
 export default function PromoCard({ promo, userId }: Props) {
   const router    = useRouter()
   const [pending, start] = useTransition()
+  const [showQR, setShowQR] = useState(false)
   const status    = promoStatus(promo)
   const ss        = STATUS_STYLES[status]
   const embed     = embedUrl(promo)
@@ -43,6 +47,16 @@ export default function PromoCard({ promo, userId }: Props) {
   }
 
   return (
+    <>
+    {showQR && (
+      <QRModal
+        slot={promo.slot}
+        name={promo.name}
+        pageUrl={promo.page_url}
+        embedUrl={`${process.env.NEXT_PUBLIC_APP_URL ?? 'https://servvee.online'}/embed/${userId}/${promo.slot}`}
+        onClose={() => setShowQR(false)}
+      />
+    )}
     <div style={{
       display: 'flex', alignItems: 'flex-start', gap: 14,
       background: 'var(--sv-surface-2)',
@@ -89,12 +103,14 @@ export default function PromoCard({ promo, userId }: Props) {
         </div>
       </div>
 
-      {/* QR */}
+      {/* QR thumbnail — click to open modal */}
       {qrUrl && (
-        <div style={{ flexShrink: 0 }}>
+        <button onClick={() => setShowQR(true)} title="View & download QR code" style={{
+          flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+        }}>
           <img src={qrUrl} alt="QR" width={72} height={72}
             style={{ borderRadius: 6, background: '#fff', padding: 3, display: 'block' }} />
-        </div>
+        </button>
       )}
 
       {/* Actions */}
@@ -110,10 +126,14 @@ export default function PromoCard({ promo, userId }: Props) {
         <Link href={`/dashboard/menus/${promo.id}`} className="btn btn-ghost btn-sm" style={{ gap: 4 }}>
           <Pencil size={11} /> Edit
         </Link>
+        <button onClick={() => setShowQR(true)} className="btn btn-ghost btn-sm" style={{ gap: 4 }}>
+          <QrCode size={11} /> QR Code
+        </button>
         <button onClick={handleDelete} className="btn btn-danger btn-sm" style={{ gap: 4 }}>
           <Trash2 size={11} /> Delete
         </button>
       </div>
     </div>
+    </>
   )
 }
