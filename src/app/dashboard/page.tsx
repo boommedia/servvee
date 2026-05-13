@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { calcROI, promoStatus } from '@/lib/types'
 import type { Promo } from '@/lib/types'
 import PromoCard from '@/components/PromoCard'
-import { Plus, Calendar, Clock, TrendingUp, UtensilsCrossed, ExternalLink, Copy } from 'lucide-react'
+import { Plus, Calendar, Clock, TrendingUp, UtensilsCrossed, Copy } from 'lucide-react'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -189,30 +189,25 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Canva tips */}
+        {/* Design tips */}
         <div className="card">
-          <div className="card-header">Canva Tips</div>
+          <div className="card-header">Design Studio Tips</div>
           <div style={{ padding: '14px 16px' }}>
             {[
-              'Design your menu in Canva',
-              'Click Share → Publish to web',
-              'Copy the link and paste above',
-              'Updates go live when you hit Publish',
-            ].map((tip, i) => (
-              <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, fontSize: 11 }}>
-                <span style={{
-                  width: 16, height: 16, borderRadius: '50%', background: 'var(--sv-accent-glow)',
-                  border: '1px solid var(--sv-accent-border)', color: 'var(--sv-accent)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 9, fontWeight: 800, flexShrink: 0,
-                }}>{i + 1}</span>
-                <span style={{ color: 'var(--sv-muted)', lineHeight: 1.4 }}>{tip}</span>
+              { icon: '🎨', text: 'Click "Add Menu" and choose Canva, Adobe Express, or import a PDF' },
+              { icon: '✦',  text: 'Connect Canva once — then pick any design directly from your account' },
+              { icon: '📄', text: 'Have an existing PDF menu? Drag and drop it to import instantly' },
+              { icon: '⚡', text: 'Your menu goes live the moment you save — no manual updates needed' },
+            ].map(({ icon, text }, i) => (
+              <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 10, fontSize: 11 }}>
+                <span style={{ fontSize: 14, flexShrink: 0, lineHeight: 1.3 }}>{icon}</span>
+                <span style={{ color: 'var(--sv-muted)', lineHeight: 1.5 }}>{text}</span>
               </div>
             ))}
-            <a href="https://www.canva.com/create/menus/" target="_blank" rel="noopener noreferrer"
-              className="btn btn-ghost btn-sm" style={{ width: '100%', justifyContent: 'center', marginTop: 6, fontSize: 11 }}>
-              <ExternalLink size={10} /> Open Canva
-            </a>
+            <Link href="/dashboard/menus/new" className="btn btn-ghost btn-sm"
+              style={{ width: '100%', justifyContent: 'center', marginTop: 6, fontSize: 11 }}>
+              <Plus size={10} /> Create a menu
+            </Link>
           </div>
         </div>
 

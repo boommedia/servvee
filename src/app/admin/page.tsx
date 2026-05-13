@@ -6,7 +6,6 @@ import { Shield } from 'lucide-react'
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? 'eric@boommedia.us').split(',')
 
-const TIER_ARPU: Record<string, number> = { starter: 29, pro: 79, agency: 199 }
 
 export default async function AdminPage() {
   const supabase = await createClient()
