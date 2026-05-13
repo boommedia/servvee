@@ -44,10 +44,13 @@ export function embedUrl(p: Pick<Promo, 'source' | 'design_id'>): string {
     return `https://www.canva.com/design/${p.design_id}/view?embed`
   }
   if (p.source === 'adobe') {
-    // Adobe Express published pages can be iframed directly
     return p.design_id.startsWith('http') ? p.design_id : `https://new.express.adobe.com/published-pages/share/${p.design_id}`
   }
-  return p.design_id // raw URL
+  // PDF: wrap in Google Docs viewer for cross-device support (iOS, Android)
+  if (p.design_id.toLowerCase().endsWith('.pdf') || p.design_id.toLowerCase().includes('/menu-pdfs/')) {
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(p.design_id)}&embedded=true`
+  }
+  return p.design_id
 }
 
 // "Edit" deep-link back to the design tool

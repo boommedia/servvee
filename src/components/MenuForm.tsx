@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ExternalLink, Eye, Wand2, Images } from 'lucide-react'
+import { ExternalLink, Eye, Wand2, Images, FileUp } from 'lucide-react'
 import { parseDesignInput, embedUrl, editUrl } from '@/lib/types'
 import type { Promo, PromoFormData, DesignSource } from '@/lib/types'
 import CopyButton from './CopyButton'
@@ -11,6 +11,7 @@ import dynamic from 'next/dynamic'
 // Loaded only when needed — keeps the main bundle small
 const AdobeExpressEditor = dynamic(() => import('./AdobeExpressEditor'), { ssr: false })
 const CanvaDesignPicker  = dynamic(() => import('./CanvaDesignPicker'),  { ssr: false })
+const PDFUploader        = dynamic(() => import('./PDFUploader'),        { ssr: false })
 
 interface Props {
   userId: string
@@ -30,9 +31,10 @@ export default function MenuForm({ userId, promo }: Props) {
   const [error, setError]          = useState('')
   const [toast, setToast]          = useState('')
 
-  // Design studio modals
+  // Design studio modals / panels
   const [showAdobe, setShowAdobe] = useState(false)
   const [showCanva, setShowCanva] = useState(false)
+  const [showPDF,   setShowPDF]   = useState(false)
 
   const [form, setForm] = useState<PromoFormData>({
     name:       promo?.name       ?? '',
@@ -95,6 +97,21 @@ export default function MenuForm({ userId, promo }: Props) {
     setPreviewKey(k => k + 1)
     setToast('Design saved from Adobe Express!')
   }, [])
+
+  // Called when PDF is uploaded — auto-fill URL, optionally open Adobe to edit
+  const handlePDFComplete = useCallback((url: string, suggestedName: string) => {
+    setRawInput(url)
+    setForm(f => ({ ...f, source: 'url', design_id: url, name: f.name || suggestedName }))
+    setPreviewKey(k => k + 1)
+    setToast('PDF uploaded! Preview updated below.')
+  }, [])
+
+  const handlePDFEditInAdobe = useCallback((pdfUrl: string) => {
+    // Close PDF panel, store URL, open Adobe Express for editing
+    handlePDFComplete(pdfUrl, '')
+    setShowPDF(false)
+    setShowAdobe(true)
+  }, [handlePDFComplete])
 
   // Called when user picks a Canva design
   const handleCanvaSelect = useCallback((designId: string, title: string) => {
@@ -188,30 +205,52 @@ export default function MenuForm({ userId, promo }: Props) {
             {/* ── Design studio buttons ── */}
             <div style={{ marginBottom: 16 }}>
               <label className="field-label">Design Studio</label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
                 <button type="button"
                   onClick={() => setShowAdobe(true)}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-                    padding: '10px 14px', borderRadius: 9, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                    padding: '10px 10px', borderRadius: 9, fontSize: 11, fontWeight: 700, cursor: 'pointer',
                     border: '1px solid rgba(255,0,0,0.3)', background: 'rgba(255,0,0,0.07)',
                     color: '#FF6B6B', transition: 'all 0.15s',
                   }}>
-                  <Wand2 size={13} />
-                  Create in Adobe Express
+                  <Wand2 size={12} />
+                  Adobe Express
                 </button>
                 <button type="button"
                   onClick={() => setShowCanva(true)}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-                    padding: '10px 14px', borderRadius: 9, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                    padding: '10px 10px', borderRadius: 9, fontSize: 11, fontWeight: 700, cursor: 'pointer',
                     border: '1px solid rgba(0,196,204,0.3)', background: 'rgba(0,196,204,0.07)',
                     color: '#00C4CC', transition: 'all 0.15s',
                   }}>
-                  <Images size={13} />
-                  Browse Canva Designs
+                  <Images size={12} />
+                  Canva Designs
+                </button>
+                <button type="button"
+                  onClick={() => setShowPDF(v => !v)}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                    padding: '10px 10px', borderRadius: 9, fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                    border: `1px solid ${showPDF ? 'var(--sv-accent)' : 'rgba(96,165,250,0.3)'}`,
+                    background: showPDF ? 'var(--sv-accent-glow)' : 'rgba(96,165,250,0.07)',
+                    color: showPDF ? 'var(--sv-accent)' : '#60A5FA', transition: 'all 0.15s',
+                  }}>
+                  <FileUp size={12} />
+                  Import PDF
                 </button>
               </div>
+
+              {/* PDF uploader panel — inline, no modal */}
+              {showPDF && (
+                <div style={{ marginTop: 10 }}>
+                  <PDFUploader
+                    onComplete={handlePDFComplete}
+                    onEditInAdobe={handlePDFEditInAdobe}
+                  />
+                </div>
+              )}
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 8, margin: '12px 0',
               }}>
@@ -397,7 +436,7 @@ export default function MenuForm({ userId, promo }: Props) {
                 <p style={{ fontSize: 13, margin: 0, textAlign: 'center', maxWidth: 280 }}>
                   Use the Design Studio above or paste a URL to preview your menu
                 </p>
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
                   <button type="button" onClick={() => setShowAdobe(true)}
                     className="btn btn-ghost btn-sm" style={{ fontSize: 11 }}>
                     ✦ Adobe Express
@@ -405,6 +444,10 @@ export default function MenuForm({ userId, promo }: Props) {
                   <button type="button" onClick={() => setShowCanva(true)}
                     className="btn btn-ghost btn-sm" style={{ fontSize: 11 }}>
                     🎨 Canva
+                  </button>
+                  <button type="button" onClick={() => setShowPDF(true)}
+                    className="btn btn-ghost btn-sm" style={{ fontSize: 11 }}>
+                    📄 Import PDF
                   </button>
                 </div>
               </div>
