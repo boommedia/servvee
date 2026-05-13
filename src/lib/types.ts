@@ -46,8 +46,13 @@ export function embedUrl(p: Pick<Promo, 'source' | 'design_id'>): string {
   if (p.source === 'adobe') {
     return p.design_id.startsWith('http') ? p.design_id : `https://new.express.adobe.com/published-pages/share/${p.design_id}`
   }
+  const lower = p.design_id.toLowerCase()
+  // Images: serve directly — embed page renders as <img>
+  if (/\.(jpe?g|png|webp|gif)(\?|$)/.test(lower)) {
+    return p.design_id
+  }
   // PDF: wrap in Google Docs viewer for cross-device support (iOS, Android)
-  if (p.design_id.toLowerCase().endsWith('.pdf') || p.design_id.toLowerCase().includes('/menu-pdfs/')) {
+  if (lower.endsWith('.pdf') || lower.includes('/menu-pdfs/')) {
     return `https://docs.google.com/viewer?url=${encodeURIComponent(p.design_id)}&embedded=true`
   }
   return p.design_id

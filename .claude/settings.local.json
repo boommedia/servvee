@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"console.log\\(require\\('./node_modules/next/package.json'\\).version\\)\")",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/react/package.json'\\).version\\)\")",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/lucide-react/package.json'\\).version\\)\")",
+      "PowerShell(cd \"g:\\\\My Drive\\\\AI\\\\Claude\\\\Projects\\\\Boom Media\\\\Servvee\"; \\(Get-Content \"node_modules\\\\next\\\\package.json\" | ConvertFrom-Json\\).version; \\(Get-Content \"node_modules\\\\react\\\\package.json\" | ConvertFrom-Json\\).version; \\(Get-Content \"node_modules\\\\lucide-react\\\\package.json\" | ConvertFrom-Json\\).version)",
+      "Bash(git commit -m ' *)",
+      "Bash(New-Item -ItemType Directory -Force \"g:\\\\My Drive\\\\AI\\\\Claude\\\\Projects\\\\Boom Media\\\\Servvee\\\\src\\\\app\\\\api\\\\email\\\\welcome\")",
+      "Bash(Out-Null)",
+      "mcp__claude_ai_ClickUp__clickup_create_list_in_folder",
+      "Bash(npx --yes next build)",
+      "Bash(node_modules/.bin/next build *)",
+      "Bash(node_modules/next/dist/bin/next build *)",
+      "mcp__claude_ai_ClickUp__clickup_filter_tasks"
+    ]
+  }
+}

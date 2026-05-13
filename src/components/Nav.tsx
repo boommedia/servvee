@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, UtensilsCrossed, Settings, LogOut, Shield } from 'lucide-react'
+import { LayoutDashboard, Briefcase, Settings, LogOut, Shield } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -11,7 +11,7 @@ const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS ?? 'eric@boommedia.us
 
 const BASE_NAV = [
   { href: '/dashboard',          label: 'Overview', icon: LayoutDashboard },
-  { href: '/dashboard/menus',    label: 'Menus',    icon: UtensilsCrossed },
+  { href: '/dashboard/menus',    label: 'Clients',  icon: Briefcase },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 

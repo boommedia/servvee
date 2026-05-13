@@ -1,12 +1,22 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Upload, FileText, X, Wand2, CheckCircle } from 'lucide-react'
+import { Upload, FileText, Image, X, Wand2, CheckCircle } from 'lucide-react'
 
 interface Props {
   onComplete: (url: string, suggestedName: string) => void
-  onEditInAdobe: (pdfUrl: string) => void
+  onEditInAdobe: (fileUrl: string) => void
 }
+
+const ACCEPTED_TYPES = [
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+]
+
+const ACCEPTED_EXT = '.pdf,.jpg,.jpeg,.png,.webp,.gif'
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`
@@ -14,18 +24,23 @@ function formatBytes(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+function isImage(type: string) {
+  return type.startsWith('image/')
+}
+
 export default function PDFUploader({ onComplete, onEditInAdobe }: Props) {
-  const [status, setStatus]     = useState<'idle' | 'uploading' | 'done' | 'error'>('idle')
-  const [filename, setFilename] = useState('')
-  const [filesize, setFilesize] = useState(0)
+  const [status, setStatus]         = useState<'idle' | 'uploading' | 'done' | 'error'>('idle')
+  const [filename, setFilename]     = useState('')
+  const [filesize, setFilesize]     = useState(0)
+  const [filetype, setFiletype]     = useState('')
   const [uploadedUrl, setUploadedUrl] = useState('')
-  const [errMsg, setErrMsg]     = useState('')
-  const [dragging, setDragging] = useState(false)
+  const [errMsg, setErrMsg]         = useState('')
+  const [dragging, setDragging]     = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   async function processFile(file: File) {
-    if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
-      setErrMsg('Please select a PDF file.')
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      setErrMsg('Supported formats: PDF, JPEG, PNG, WebP, GIF.')
       setStatus('error')
       return
     }
@@ -38,18 +53,20 @@ export default function PDFUploader({ onComplete, onEditInAdobe }: Props) {
     setStatus('uploading')
     setFilename(file.name)
     setFilesize(file.size)
+    setFiletype(file.type)
     setErrMsg('')
 
     const body = new FormData()
     body.append('file', file)
 
     try {
-      const res = await fetch('/api/upload/pdf', { method: 'POST', body })
+      const res  = await fetch('/api/upload/pdf', { method: 'POST', body })
       const data = await res.json() as { url?: string; error?: string }
       if (!res.ok) throw new Error(data.error ?? 'Upload failed')
       setUploadedUrl(data.url!)
       setStatus('done')
-      onComplete(data.url!, file.name.replace(/\.pdf$/i, ''))
+      const baseName = file.name.replace(/\.[^.]+$/, '')
+      onComplete(data.url!, baseName)
     } catch (err) {
       setErrMsg(err instanceof Error ? err.message : 'Upload failed')
       setStatus('error')
@@ -60,6 +77,7 @@ export default function PDFUploader({ onComplete, onEditInAdobe }: Props) {
     setStatus('idle')
     setFilename('')
     setFilesize(0)
+    setFiletype('')
     setUploadedUrl('')
     setErrMsg('')
   }
@@ -86,7 +104,6 @@ export default function PDFUploader({ onComplete, onEditInAdobe }: Props) {
           </button>
         </div>
 
-        {/* Action buttons */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           <button
             type="button"
@@ -109,7 +126,8 @@ export default function PDFUploader({ onComplete, onEditInAdobe }: Props) {
               border: '1px solid var(--sv-border)', background: 'var(--sv-surface-2)',
               color: 'var(--sv-muted)', textDecoration: 'none',
             }}>
-            <FileText size={12} /> View PDF
+            {isImage(filetype) ? <Image size={12} /> : <FileText size={12} />}
+            View File
           </a>
         </div>
       </div>
@@ -140,7 +158,7 @@ export default function PDFUploader({ onComplete, onEditInAdobe }: Props) {
         <input
           ref={inputRef}
           type="file"
-          accept=".pdf,application/pdf"
+          accept={ACCEPTED_EXT}
           style={{ display: 'none' }}
           onChange={e => { const f = e.target.files?.[0]; if (f) processFile(f) }}
         />
@@ -152,7 +170,7 @@ export default function PDFUploader({ onComplete, onEditInAdobe }: Props) {
             <div style={{ height: 3, background: 'var(--sv-border)', borderRadius: 2, margin: '12px 0', overflow: 'hidden' }}>
               <div style={{
                 height: '100%', background: 'var(--sv-accent)', borderRadius: 2,
-                width: '60%', animation: 'pdfProgress 1.2s ease-in-out infinite alternate',
+                width: '60%', animation: 'fileProgress 1.2s ease-in-out infinite alternate',
               }} />
             </div>
             <p style={{ fontSize: 11, color: 'var(--sv-muted)' }}>This may take a moment…</p>
@@ -161,7 +179,7 @@ export default function PDFUploader({ onComplete, onEditInAdobe }: Props) {
           <>
             <Upload size={28} style={{ color: 'var(--sv-muted)', marginBottom: 10 }} />
             <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>
-              Drop your PDF menu here
+              Drop your file here
             </p>
             <p style={{ fontSize: 11, color: 'var(--sv-muted)', marginBottom: 0 }}>
               or click to browse · Max 20 MB
@@ -175,12 +193,12 @@ export default function PDFUploader({ onComplete, onEditInAdobe }: Props) {
       )}
 
       <p style={{ fontSize: 10, color: 'var(--sv-muted)', marginTop: 8, lineHeight: 1.5 }}>
-        Supported: any PDF exported from Word, InDesign, Illustrator, or other design tools.
+        Supported: <strong style={{ color: 'var(--sv-text)' }}>PDF, JPEG, PNG, WebP, GIF</strong> — exported from Canva, Adobe, Word, InDesign, or any design tool.
         After upload, use <strong style={{ color: 'var(--sv-text)' }}>Edit in Adobe Express</strong> to redesign it.
       </p>
 
       <style>{`
-        @keyframes pdfProgress {
+        @keyframes fileProgress {
           from { transform: translateX(-100%) }
           to   { transform: translateX(200%) }
         }

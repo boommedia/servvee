@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { calcROI, promoStatus } from '@/lib/types'
 import type { Promo } from '@/lib/types'
 import PromoCard from '@/components/PromoCard'
-import { Plus, Calendar, Clock, TrendingUp, UtensilsCrossed, Copy } from 'lucide-react'
+import { Plus, Calendar, Clock, TrendingUp, Briefcase, Copy } from 'lucide-react'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -38,8 +38,8 @@ export default async function DashboardPage() {
           </h1>
           <p style={{ fontSize: 13, color: 'var(--sv-muted)', margin: 0 }}>
             {typed.length === 0
-              ? 'Add your first menu to get started.'
-              : `${active.length} active menu${active.length !== 1 ? 's' : ''} · ${live.length > 0 ? `${live.length} holiday promo live now` : 'No holiday promos active'}`}
+              ? 'Add your first client to get started.'
+              : `${active.length} active client${active.length !== 1 ? 's' : ''} · ${live.length > 0 ? `${live.length} holiday promo live now` : 'No holiday promos active'}`}
           </p>
         </div>
 
@@ -47,9 +47,9 @@ export default async function DashboardPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
           {[
             {
-              label: 'Active Menus',
+              label: 'Active Clients',
               val: active.length,
-              icon: <UtensilsCrossed size={16} />,
+              icon: <Briefcase size={16} />,
               color: 'var(--sv-accent)',
               sub: `${typed.length} total`,
             },
@@ -112,9 +112,9 @@ export default async function DashboardPage() {
 
         {/* Menus list */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 800, margin: 0 }}>Your Menus</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 800, margin: 0 }}>Your Clients</h2>
           <Link href="/dashboard/menus/new" className="btn btn-primary btn-sm">
-            <Plus size={12} /> Add Menu
+            <Plus size={12} /> Add Client
           </Link>
         </div>
 
@@ -123,10 +123,10 @@ export default async function DashboardPage() {
             <div style={{ fontSize: 44, marginBottom: 14 }}>🍽</div>
             <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>No menus yet</h3>
             <p style={{ color: 'var(--sv-muted)', fontSize: 13, marginBottom: 24, maxWidth: 340, margin: '0 auto 24px' }}>
-              Add your first Canva or Adobe Express design. It will appear as a live embed on your website.
+              Add your first client — upload a menu, ad, promo, or graphic using Canva, Adobe Express, or a direct file upload.
             </p>
             <Link href="/dashboard/menus/new" className="btn btn-primary">
-              <Plus size={14} /> Add Your First Menu
+              <Plus size={14} /> Add Your First Client
             </Link>
           </div>
         ) : (
@@ -155,8 +155,8 @@ export default async function DashboardPage() {
           <div className="card-header">Quick Actions</div>
           <div style={{ padding: '12px' }}>
             {[
-              { href: '/dashboard/menus/new', icon: <Plus size={13} />, label: 'Add new menu', primary: true },
-              { href: '/dashboard/menus', icon: <UtensilsCrossed size={13} />, label: 'Manage all menus', primary: false },
+              { href: '/dashboard/menus/new', icon: <Plus size={13} />, label: 'Add new client', primary: true },
+              { href: '/dashboard/menus', icon: <Briefcase size={13} />, label: 'Manage all clients', primary: false },
               { href: '/dashboard/settings', icon: <Copy size={13} />, label: 'Get embed snippet', primary: false },
             ].map(({ href, icon, label, primary }) => (
               <Link key={href} href={href} className={`btn ${primary ? 'btn-primary' : 'btn-ghost'}`} style={{

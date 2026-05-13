@@ -189,7 +189,7 @@ export default function MenuForm({ userId, promo }: Props) {
 
         {/* ── Form ── */}
         <form onSubmit={handleSubmit} className="card" style={{ overflow: 'hidden' }}>
-          <div className="card-header">{promo ? 'Edit' : 'New'} Menu / Promo</div>
+          <div className="card-header">{promo ? 'Edit' : 'New'} Client</div>
           <div style={{ padding: '20px 20px 24px' }}>
 
             {error && (
@@ -238,7 +238,7 @@ export default function MenuForm({ userId, promo }: Props) {
                     color: showPDF ? 'var(--sv-accent)' : '#60A5FA', transition: 'all 0.15s',
                   }}>
                   <FileUp size={12} />
-                  Import PDF
+                  Upload File
                 </button>
               </div>
 
@@ -306,10 +306,10 @@ export default function MenuForm({ userId, promo }: Props) {
 
             {/* ── Name ── */}
             <div style={{ marginBottom: 16 }}>
-              <label className="field-label">Menu Name</label>
+              <label className="field-label">Name</label>
               <input className="field-input" type="text" value={form.name}
                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                placeholder="e.g. Main Menu, Christmas Special"
+                placeholder="e.g. Main Menu, Summer Ad, Christmas Promo"
                 required />
             </div>
 
@@ -377,7 +377,7 @@ export default function MenuForm({ userId, promo }: Props) {
 
             <div style={{ display: 'flex', gap: 8 }}>
               <button type="submit" className="btn btn-primary" disabled={pending} style={{ flex: 1 }}>
-                {pending ? 'Saving…' : promo ? 'Update Menu' : 'Add Menu'}
+                {pending ? 'Saving…' : promo ? 'Update Client' : 'Add Client'}
               </button>
               <a href="/dashboard/menus" className="btn btn-ghost">Cancel</a>
             </div>
@@ -434,7 +434,7 @@ export default function MenuForm({ userId, promo }: Props) {
               }}>
                 <div style={{ fontSize: 40 }}>🎨</div>
                 <p style={{ fontSize: 13, margin: 0, textAlign: 'center', maxWidth: 280 }}>
-                  Use the Design Studio above or paste a URL to preview your menu
+                  Use the Design Studio above or paste a URL to preview your design
                 </p>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
                   <button type="button" onClick={() => setShowAdobe(true)}
@@ -447,7 +447,7 @@ export default function MenuForm({ userId, promo }: Props) {
                   </button>
                   <button type="button" onClick={() => setShowPDF(true)}
                     className="btn btn-ghost btn-sm" style={{ fontSize: 11 }}>
-                    📄 Import PDF
+                    📄 Upload File
                   </button>
                 </div>
               </div>
